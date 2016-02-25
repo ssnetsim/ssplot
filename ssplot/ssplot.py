@@ -35,6 +35,7 @@ from __future__ import (absolute_import, division,
 import copy
 import math
 import numpy
+import percentile
 
 
 def maxNoInfinity(v):
@@ -88,9 +89,6 @@ class GridStats(object):
 
 # a class to represent latency stats
 class LatencyStats(object):
-  CDF_LOG_LABELS = ['', '90%', '99%', '99.9%', '99.99%', '99.999%',
-                    '99.9999%', '99.99999%', '99.999999%', '99.9999999%',
-                    '99.99999999%']
 
   class PlotBounds(object):
     def __init__(self):
@@ -109,8 +107,6 @@ class LatencyStats(object):
       self.cpymax = 1
       self.lpxmin = 0
       self.lpxmax = 1
-      self.lpymin = 0
-      self.lpymax = 6
       self.setmid()
       self.default = True
 
@@ -128,8 +124,6 @@ class LatencyStats(object):
       self.cpymax = grid.get('cpy', 'max')
       self.lpxmin = grid.get('lpx', 'min')
       self.lpxmax = grid.get('lpx', 'max')
-      self.lpymin = grid.get('lpy', 'min')
-      self.lpymax = grid.get('lpy', 'max')
       self.setmid()
       self.default = False
 
@@ -142,11 +136,10 @@ class LatencyStats(object):
               'cpx,{6},{7}\n'
               'cpy,{8},{9}\n'
               'lpx,{10},{11}\n'
-              'lpy,{12},{13}\n'
               .format(self.spymin, self.spymax,
                       self.ppxmin, self.ppxmax, self.ppymin, self.ppymax,
                       self.cpxmin, self.cpxmax, self.cpymin, self.cpymax,
-                      self.lpxmin, self.lpxmax, self.lpymin, self.lpymax),
+                      self.lpxmin, self.lpxmax),
               file=fd)
 
     def setmid(self):
@@ -157,7 +150,6 @@ class LatencyStats(object):
       self.cpxmid = (self.cpxmax - self.cpxmin) / 2
       self.cpymid = (self.cpymax - self.cpymin) / 2
       self.lpxmid = (self.lpxmax - self.lpxmin) / 2
-      self.lpymid = (self.lpymax - self.lpymin) / 2
       self.default = False
 
     def greater(self, other):
@@ -183,8 +175,6 @@ class LatencyStats(object):
       new.cpymax = max(self.cpymax, other.cpymax)
       new.lpxmin = min(self.lpxmin, other.lpxmin)
       new.lpxmax = max(self.lpxmax, other.lpxmax)
-      new.lpymin = min(self.lpymin, other.lpymin)
-      new.lpymax = max(self.lpymax, other.lpymax)
       new.setmid()
       return new
 
@@ -226,14 +216,6 @@ class LatencyStats(object):
       self.cdfx = numpy.sort(self.latencies)
       self.cdfy = numpy.linspace(1.0 / self.size, 1.0, self.size)
 
-      # compute the logarithmic cumulative distribution function
-      self.logcdfy = [-math.log10(1.0 - (float(idx) / self.size))
-                      for idx in range(self.size)]
-      """
-      self.logcdflabels = LatencyStats.CDF_LOG_LABELS[
-        0:math.ceil(max(self.logcdfy)) + 1]
-      """
-
       # find percentiles
       self.p50 = self.percentile(0.50)
       self.p90 = self.percentile(0.90)
@@ -256,16 +238,21 @@ class LatencyStats(object):
       self.bounds.cpxmax = self.smax
       self.bounds.cpymin = 0
       self.bounds.cpymax = 1
-      self.bounds.lpxmin = self.smin
-      self.bounds.lpxmax = self.smax * 1.01
-      self.bounds.lpymin = 0
-      self.bounds.lpymax = math.ceil(max(self.logcdfy))
+      self.bounds.lpxmin = self.smin * 0.999
+      self.bounds.lpxmax = self.smax * 1.001
       self.bounds.setmid()
 
   def percentile(self, percent):
     if percent < 0 or percent > 1:
       raise Exception('percent must be between 0 and 1')
     return self.cdfx[int(round(percent * len(self.cdfx)))]
+
+  def nines(self):
+    if self.size > 0:
+      nines = int(math.ceil(math.log10(len(self.cdfx))))
+    else:
+      nines = 5
+    return nines
 
   def emptyPlot(self, axes, x, y):
     axes.text(x, y, 'Saturated :(', clip_on=False, color='red',
@@ -365,9 +352,7 @@ class LatencyStats(object):
     axes.set_xlabel('Latency')
     axes.set_ylabel('Percentile')
     axes.set_xlim(self.bounds.lpxmin, self.bounds.lpxmax)
-    axes.set_ylim(self.bounds.lpymin, self.bounds.lpymax)
-    axes.set_yticklabels(
-      LatencyStats.CDF_LOG_LABELS[0:int(self.bounds.lpymax)+1])
+    axes.set_yscale('percentile', nines=self.nines())
     axes.grid(True)
     if xlog:
       axes.set_xscale('log')
@@ -375,9 +360,9 @@ class LatencyStats(object):
     # detect non-empty data set
     if self.size > 0:
       # create the plot
-      axes.scatter(self.cdfx, self.logcdfy, color='b', s=2)
+      axes.scatter(self.cdfx, self.cdfy, color='b', s=2)
     else:
-      self.emptyPlot(axes, self.bounds.lpxmid, self.bounds.lpymid)
+      self.emptyPlot(axes, self.bounds.lpxmid, 0.999)
 
   def quadPlot(self, plt, filename, title='',
                spxmin=float('Nan'), spxmax=float('NaN'),
@@ -386,8 +371,7 @@ class LatencyStats(object):
                ppymin=float('Nan'), ppymax=float('NaN'),
                cpxmin=float('Nan'), cpxmax=float('NaN'),
                cpymin=float('Nan'), cpymax=float('NaN'),
-               lpxmin=float('Nan'), lpxmax=float('NaN'),
-               lpymin=float('Nan'), lpymax=float('NaN')):
+               lpxmin=float('Nan'), lpxmax=float('NaN')):
     if not math.isnan(spxmin):
       self.bounds.spxmin = spxmin
     if not math.isnan(spxmax):
@@ -419,10 +403,6 @@ class LatencyStats(object):
       self.bounds.lpxmin = lpxmin
     if not math.isnan(lpxmax):
       self.bounds.lpxmax = lpxmax
-    if not math.isnan(lpymin):
-      self.bounds.lpymin = lpymin
-    if not math.isnan(lpymax):
-      self.bounds.lpymax = lpymax
 
     self.bounds.setmid()
 

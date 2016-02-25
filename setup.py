@@ -61,5 +61,5 @@ setup(
   url='http://github.com/nicmcd/ssplot',
   packages=['ssplot'],
   scripts=['bin/sslqp', 'bin/ssllp'],
-  install_requires=['numpy >= 1.4.3'],
+  install_requires=['percentile >= 1.0.1'],
 )
