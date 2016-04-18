@@ -434,6 +434,11 @@ class LoadLatencyStats(object):
       self.ymax = float('inf')
       self.default = True
 
+    def load(ymin=float('inf'), ymax=float('inf')):
+      self.ymin = ymin
+      self.ymax = ymax
+      self.default = ymin is not float('inf') or ymax is not float('inf')
+
     def readFile(self, filename):
       grid = GridStats(filename)
       self.ymin = grid.get('y', 'min')
@@ -557,22 +562,24 @@ class LoadLatencyStats(object):
                ncol=2)
 
     # set plot bounds
-    ymin = self.bounds.ymin - (0.025 * self.bounds.ymax)
-    ymax = self.bounds.ymax + (0.025 * self.bounds.ymax)
     ax1.set_xlim(self.data['Load'][0], self.data['Load'][-1]);
-    ax1.set_ylim(ymin, ymax);
+    ax1.set_ylim(self.bounds.ymin, self.bounds.ymax);
     ax1.xaxis.grid(True)
     ax1.yaxis.grid(True)
 
     fig.tight_layout()
     fig.savefig(filename)
 
-  def plotCompare(plt, filename, stats, field='Mean', labels=[], title=''):
+  @staticmethod
+  def plotCompare(plt, filename, stats, field='Mean', labels=[], title='',
+                  ymin=float('NaN'), ymax=float('NaN')):
     # make sure the loads are all the same
     mload = stats[0].data['Load']
     for stat in stats:
-      assert len(mload) == set(mload).intersection(stat.data['Load'])
+      assert len(mload) == len(set(mload).intersection(stat.data['Load'])), \
+        print('{0} != {1}'.format(mload, stat.data['Load']))
     assert len(labels) == 0 or len(labels) == len(stats)
+    assert field is not 'Load'
 
     # create figure
     fig = plt.figure(figsize=(16, 10))
@@ -585,7 +592,7 @@ class LoadLatencyStats(object):
 
     # set axis labels
     ax1.set_xlabel('Load')
-    ax1.set_ylabel('Latency')
+    ax1.set_ylabel('{0} Latency'.format(field))
 
     # plot all lines
     lines = []
@@ -593,7 +600,7 @@ class LoadLatencyStats(object):
       label = None
       if len(labels) > 0:
         label = labels[idx]
-      line, = ax1.plot(mload, stat.data[field], color=colors[dx], lw=1,
+      line, = ax1.plot(mload, stat.data[field], color=colors[idx], lw=1,
                        label=label)
       lines.append(line)
 
@@ -608,7 +615,13 @@ class LoadLatencyStats(object):
                  ncol=2)
 
     # set plot bounds
-    ax1.set_xlim(self.data['Load'][0], self.data['Load'][-1]);
+    ax1.set_xlim(stats[0].data['Load'][0], stats[0].data['Load'][-1]);
+    if not math.isnan(ymin) and not math.isnan(ymax):
+      ax1.set_ylim(ymin, ymax)
+    elif not math.isnan(ymin):
+      ax1.set_ylim(bottom=ymin)
+    elif not math.isnan(ymax):
+      ax1.set_ylim(top=ymax)
     ax1.grid(True)
 
     fig.tight_layout()
