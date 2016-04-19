@@ -427,6 +427,9 @@ class LatencyStats(object):
  # a class to represent load vs. latency stats
 class LoadLatencyStats(object):
 
+  FIELDS = ['Minimum', 'Mean', 'Median', '90th%', '99th%', '99.9th%',
+            '99.99th%', '99.999th%', 'Maximum']
+
   class PlotBounds(object):
     def __init__(self):
       # defaults
@@ -474,16 +477,9 @@ class LoadLatencyStats(object):
   def __init__(self, start, stop, step, grids, **kwargs):
     # create arrays
     load = numpy.arange(start, stop, step)
-    self.data = {'Load'      : load,
-                 'Minimum'   : numpy.empty(len(load), dtype=float),
-                 'Maximum'   : numpy.empty(len(load), dtype=float),
-                 'Median'    : numpy.empty(len(load), dtype=float),
-                 '90th%'     : numpy.empty(len(load), dtype=float),
-                 '99th%'     : numpy.empty(len(load), dtype=float),
-                 '99.9th%'   : numpy.empty(len(load), dtype=float),
-                 '99.99th%'  : numpy.empty(len(load), dtype=float),
-                 '99.999th%' : numpy.empty(len(load), dtype=float),
-                 'Mean'      : numpy.empty(len(load), dtype=float)}
+    self.data = {'Load': load}
+    for field in LoadLatencyStats.FIELDS:
+      self.data[field] = numpy.empty(len(load), dtype=float)
 
     # parse kwargs
     verbose = kwargs.get('verbose', False);
@@ -533,24 +529,9 @@ class LoadLatencyStats(object):
 
     # plot load vs. latency curves
     lines = []
-    lines.append(ax1.plot(self.data['Load'], self.data['Minimum'],
-                          color=colors[8], lw=1, label='Minimum')[0])
-    lines.append(ax1.plot(self.data['Load'], self.data['Maximum'],
-                          color=colors[7], lw=1, label='Maximum')[0])
-    lines.append(ax1.plot(self.data['Load'], self.data['Median'],
-                          color=colors[6], lw=1, label='Median')[0])
-    lines.append(ax1.plot(self.data['Load'], self.data['90th%'],
-                          color=colors[5], lw=1, label='90th%')[0])
-    lines.append(ax1.plot(self.data['Load'], self.data['99th%'],
-                          color=colors[4], lw=1, label='99th%')[0])
-    lines.append(ax1.plot(self.data['Load'], self.data['99.9th%'],
-                          color=colors[3], lw=1, label='99.9th%')[0])
-    lines.append(ax1.plot(self.data['Load'], self.data['99.99th%'],
-                          color=colors[2], lw=1, label='99.99th%')[0])
-    lines.append(ax1.plot(self.data['Load'], self.data['99.999th%'],
-                          color=colors[1], lw=1, label='99.999th%')[0])
-    lines.append(ax1.plot(self.data['Load'], self.data['Mean'],
-                          color=colors[0], lw=1, label='Mean')[0])
+    for idx, field in enumerate(reversed(LoadLatencyStats.FIELDS)):
+      lines.append(ax1.plot(self.data['Load'], self.data[field],
+                            color=colors[idx], lw=1, label=field)[0])
 
     # if given, apply title
     if title:
@@ -559,7 +540,7 @@ class LoadLatencyStats(object):
     # create legend
     labels = [line.get_label() for line in lines]
     ax1.legend(lines, labels, loc='upper left', fancybox=True, shadow=True,
-               ncol=2)
+               ncol=1)
 
     # set plot bounds
     ax1.set_xlim(self.data['Load'][0], self.data['Load'][-1]);
@@ -579,7 +560,7 @@ class LoadLatencyStats(object):
       assert len(mload) == len(set(mload).intersection(stat.data['Load'])), \
         print('{0} != {1}'.format(mload, stat.data['Load']))
     assert len(labels) == 0 or len(labels) == len(stats)
-    assert field is not 'Load'
+    assert field in LoadLatencyStats.FIELDS
 
     # create figure
     fig = plt.figure(figsize=(16, 10))
@@ -612,7 +593,7 @@ class LoadLatencyStats(object):
     if len(labels) > 0:
       labels = [line.get_label() for line in lines]
       ax1.legend(lines, labels, loc='upper left', fancybox=True, shadow=True,
-                 ncol=2)
+                 ncol=1)
 
     # set plot bounds
     ax1.set_xlim(stats[0].data['Load'][0], stats[0].data['Load'][-1]);
