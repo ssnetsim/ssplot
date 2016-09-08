@@ -56,8 +56,9 @@ class GridStats(object):
   def __init__(self, filename):
     self.filename = filename
     opener = gzip.open if filename.endswith('.gz') else open
-    with opener(filename) as fd:
+    with opener(filename, 'rb') as fd:
       lines = fd.readlines()
+    lines = [line.decode('utf-8') for line in lines]
     rows = []
     for line in lines:
       cols = line.split(',')
