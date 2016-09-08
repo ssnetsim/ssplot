@@ -33,6 +33,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 import copy
+import gzip
 import math
 import numpy
 import percentile
@@ -54,7 +55,8 @@ class GridStats(object):
 
   def __init__(self, filename):
     self.filename = filename
-    with open(filename) as fd:
+    opener = gzip.open if filename.endswith('.gz') else open
+    with opener(filename) as fd:
       lines = fd.readlines()
     rows = []
     for line in lines:
@@ -128,7 +130,8 @@ class LatencyStats(object):
       self.default = False
 
     def writeFile(self, filename):
-      with open(filename, 'w') as fd:
+      opener = gzip.open if filename.endswith('.gz') else open
+      with opener(filename, 'w') as fd:
         print('axis,min,max\n'
               'spy,{0},{1}\n'
               'ppx,{2},{3}\n'
@@ -182,9 +185,10 @@ class LatencyStats(object):
     # read in raw data
     self.times = []
     self.latencies = []
-    with open(filename, 'r') as fd:
+    opener = gzip.open if filename.endswith('.gz') else open
+    with opener(filename, 'rb') as fd:
       while (True):
-        line = fd.readline()
+        line = fd.readline().decode('utf-8')
         delim = line.find(',')
         if (delim >= 0):
           startTime = int(line[:delim])
@@ -256,8 +260,8 @@ class LatencyStats(object):
 
   def emptyPlot(self, axes, x, y):
     axes.text(x, y, 'Saturated :(', clip_on=False, color='red',
-             verticalalignment='center',
-             horizontalalignment='center')
+              verticalalignment='center',
+              horizontalalignment='center')
 
   def scatterPlot(self, axes, showPercentiles=False, randomColors=False):
     # format axes
@@ -449,7 +453,8 @@ class LoadLatencyStats(object):
       self.default = False
 
     def writeFile(self, filename):
-      with open(filename, 'w') as fd:
+      opener = gzip.open if filename.endswith('.gz') else open
+      with opener(filename, 'w') as fd:
         print('axis,min,max\n'
               'y,{0},{1}\n'
               .format(self.ymin, self.ymax),
