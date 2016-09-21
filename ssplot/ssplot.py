@@ -250,7 +250,9 @@ class LatencyStats(object):
   def percentile(self, percent):
     if percent < 0 or percent > 1:
       raise Exception('percent must be between 0 and 1')
-    return self.cdfx[int(round(percent * len(self.cdfx)))]
+    index = int(round(percent * len(self.cdfx)))
+    index = min(len(self.cdfy) - 1, index)
+    return self.cdfx[index]
 
   def nines(self):
     if self.size > 0:
