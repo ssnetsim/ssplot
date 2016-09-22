@@ -560,13 +560,15 @@ class LoadLatencyStats(object):
     fig.savefig(filename)
 
   @staticmethod
-  def plotCompare(plt, filename, stats, field='Mean', labels=[], title='',
+  def plotCompare(plt, filename, stats, field='Mean', labels=None, title='',
                   ymin=float('NaN'), ymax=float('NaN')):
     # make sure the loads are all the same
     mload = stats[0].data['Load']
     for stat in stats:
       assert len(mload) == len(set(mload).intersection(stat.data['Load'])), \
         print('{0} != {1}'.format(mload, stat.data['Load']))
+    if labels == None:
+      labels = []
     assert len(labels) == 0 or len(labels) == len(stats)
     assert field in LoadLatencyStats.FIELDS
 
