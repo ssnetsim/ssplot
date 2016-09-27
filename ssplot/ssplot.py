@@ -59,6 +59,7 @@ class GridStats(object):
     with opener(filename, 'rb') as fd:
       lines = fd.readlines()
     lines = [line.decode('utf-8') for line in lines]
+    self.num_rows = len(lines)
     rows = []
     for line in lines:
       cols = line.split(',')
@@ -73,15 +74,17 @@ class GridStats(object):
         continue
       rowType = None
       for cidx, col in enumerate(row):
-        if cidx == 0:
-          rowType = col
-          self._map[rowType] = {}
-        else:
+        try:
+          val = int(col)
+        except ValueError:
           try:
-            val = int(col)
-          except ValueError:
             val = float(col)
-          self._map[rowType][headerRow[cidx]] = val
+          except ValueError:
+            val = str(col)
+        if cidx == 0:
+          rowType = val
+          self._map[rowType] = {}
+        self._map[rowType][headerRow[cidx]] = val
 
   def get(self, row, col):
     try:
@@ -431,7 +434,7 @@ class LatencyStats(object):
     fig.savefig(filename)
 
 
- # a class to represent load vs. latency stats
+# a class to represent load vs. latency stats
 class LoadLatencyStats(object):
 
   FIELDS = ['Minimum', 'Mean', 'Median', '90th%', '99th%', '99.9th%',
@@ -527,7 +530,7 @@ class LoadLatencyStats(object):
     ax1 = fig.add_subplot(1, 1, 1)
 
     # create a colors list from a colormap
-    lineCount = 9
+    lineCount = len(LoadLatencyStats.FIELDS)
     cmap = plt.get_cmap('gist_rainbow')
     colors = [cmap(idx) for idx in numpy.linspace(0, 1, lineCount)]
 
@@ -614,6 +617,141 @@ class LoadLatencyStats(object):
     elif not math.isnan(ymax):
       ax1.set_ylim(top=ymax)
     ax1.grid(True)
+
+    fig.tight_layout()
+    fig.savefig(filename)
+
+
+# a class to represent rate stats
+class RateStats(object):
+
+  FIELDS = ['Minimum', 'Mean', 'Maximum']
+
+  class PlotBounds(object):
+    def __init__(self):
+      # defaults
+      self.ymin = float('inf')
+      self.ymax = float('inf')
+      self.default = True
+
+    def load(ymin=float('inf'), ymax=float('inf')):
+      self.ymin = ymin
+      self.ymax = ymax
+      self.default = ymin is not float('inf') or ymax is not float('inf')
+
+    def readFile(self, filename):
+      grid = GridStats(filename)
+      self.ymin = grid.get('y', 'min')
+      self.ymax = grid.get('y', 'max')
+      self.default = False
+
+    def writeFile(self, filename):
+      opener = gzip.open if filename.endswith('.gz') else open
+      with opener(filename, 'w') as fd:
+        print('axis,min,max\n'
+              'y,{0},{1}\n'
+              .format(self.ymin, self.ymax),
+              file=fd)
+
+    def greater(self, other):
+      # detect defaults
+      if self.default == True and other.default == True:
+        return RateStats.PlotBounds()
+      elif self.default == False and other.default == True:
+        return copy.deepcopy(self)
+      elif self.default == True and other.default == False:
+        return copy.deepcopy(other)
+
+      # both are not defaults, do comparison
+      new = RateStats.PlotBounds()
+      new.ymin = min(self.ymin, other.ymin)
+      assert new.ymin <= self.ymin
+      assert new.ymin <= other.ymin
+      new.ymax = maxNoInfinity([self.ymax, other.ymax])
+      new.default = False
+      return new
+
+
+  def __init__(self, start, stop, step, grids, **kwargs):
+    # create arrays
+    injection = numpy.arange(start, stop, step)
+    self.data = {'Injection': injection}
+    for field in RateStats.FIELDS:
+      self.data[field] = numpy.empty(len(injection), dtype=float)
+
+    # parse kwargs
+    verbose = kwargs.get('verbose', False);
+    if verbose:
+      print('load {0}'.format(self.data['Injection']))
+
+    assert len(grids) == len(self.data['Injection']), "wrong number of grids"
+
+    # load data arrays
+    for idx, grid in enumerate(grids):
+      assert type(grid) == GridStats, "'grid' elements must be GridStats"
+      if verbose:
+        print('extracting {0}'.format(grid.filename))
+      # extract ejection
+      ejection = []
+      for term in range(0, grid.num_rows - 1):
+        ejection.append(grid.get(term, 'ejection'))
+      # compute stats
+      minEj = min(ejection)
+      meanEj = sum(ejection) / len(ejection)
+      maxEj = max(ejection)
+      # prepare data
+      self.data['Minimum'][idx] = minEj
+      self.data['Mean'][idx] = meanEj
+      self.data['Maximum'][idx] = maxEj
+      if verbose:
+        print('Injection={0} -> Min={1} Mean={2} Max={3}'.format(
+          self.data['Injection'][idx], minEj, meanEj, maxEj))
+
+    self.bounds = RateStats.PlotBounds()
+
+    self.bounds.ymin = min(self.data['Minimum'])
+    self.bounds.ymax = maxNoInfinity(self.data['Maximum'])
+
+  def plotAll(self, plt, filename, title='',
+              ymin=float('Nan'), ymax=float('NaN')):
+    if not math.isnan(ymin):
+      self.bounds.ymin = ymin
+    if not math.isnan(ymax):
+      self.bounds.ymax = ymax
+
+    # create figure
+    fig = plt.figure(figsize=(16, 10))
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    # create a colors list from a colormap
+    lineCount = len(RateStats.FIELDS)
+    cmap = plt.get_cmap('gist_rainbow')
+    colors = [cmap(idx) for idx in numpy.linspace(0, 1, lineCount)]
+
+    # set axis labels
+    ax1.set_xlabel('Injection Rate')
+    ax1.set_ylabel('Ejection Rate')
+
+    # plot load vs. latency curves
+    lines = []
+    for idx, field in enumerate(reversed(RateStats.FIELDS)):
+      lines.append(ax1.plot(self.data['Injection'], self.data[field],
+                            color=colors[idx], lw=1, label=field)[0])
+
+    # if given, apply title
+    if title:
+      ax1.set_title(title, fontsize=20)
+
+    # create legend
+    labels = [line.get_label() for line in lines]
+    ax1.legend(lines, labels, loc='upper left', fancybox=True, shadow=True,
+               ncol=1)
+
+    # set plot bounds
+    ax1.set_xlim(self.data['Injection'][0], self.data['Injection'][-1]);
+    ax1.set_ylim(self.bounds.ymin, self.bounds.ymax);
+    ax1.xaxis.grid(True)
+    ax1.yaxis.grid(True)
 
     fig.tight_layout()
     fig.savefig(filename)
