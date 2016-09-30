@@ -86,11 +86,14 @@ class GridStats(object):
           self._map[rowType] = {}
         self._map[rowType][headerRow[cidx]] = val
 
-  def get(self, row, col):
+  def get(self, row, col, safe=False):
     try:
       return self._map[row][col]
     except:
-      return float('inf')
+      if not safe:
+        return float('inf')
+      else:
+        raise ValueError('row={0} col={1} doesn\'t exist'.format(row, col))
 
 
 # a class to represent latency stats
@@ -508,7 +511,7 @@ class LoadLatencyStats(object):
         print('extracting {0}'.format(grid.filename))
       for key in self.data.keys():
         if key != 'Load':
-          s = grid.get(statRow, key)
+          s = grid.get(statRow, key, safe=True)
           if verbose:
             print('Load {0} {1} is {2}'.format(self.data['Load'][idx], key, s))
           self.data[key][idx] = s
@@ -674,38 +677,38 @@ class RateStats(object):
 
   def __init__(self, start, stop, step, grids, **kwargs):
     # create arrays
-    injection = numpy.arange(start, stop, step)
-    self.data = {'Injection': injection}
+    injected = numpy.arange(start, stop, step)
+    self.data = {'Injected': injected}
     for field in RateStats.FIELDS:
-      self.data[field] = numpy.empty(len(injection), dtype=float)
+      self.data[field] = numpy.empty(len(injected), dtype=float)
 
     # parse kwargs
     verbose = kwargs.get('verbose', False);
     if verbose:
-      print('load {0}'.format(self.data['Injection']))
+      print('load {0}'.format(self.data['Injected']))
 
-    assert len(grids) == len(self.data['Injection']), "wrong number of grids"
+    assert len(grids) == len(self.data['Injected']), "wrong number of grids"
 
     # load data arrays
     for idx, grid in enumerate(grids):
       assert type(grid) == GridStats, "'grid' elements must be GridStats"
       if verbose:
         print('extracting {0}'.format(grid.filename))
-      # extract ejection
-      ejection = []
+      # extract delivered
+      delivered = []
       for term in range(0, grid.num_rows - 1):
-        ejection.append(grid.get(term, 'ejection'))
+        delivered.append(grid.get(term, 'delivered', safe=True) * 100)
       # compute stats
-      minEj = min(ejection)
-      meanEj = sum(ejection) / len(ejection)
-      maxEj = max(ejection)
+      minEj = min(delivered)
+      meanEj = sum(delivered) / len(delivered)
+      maxEj = max(delivered)
       # prepare data
       self.data['Minimum'][idx] = minEj
       self.data['Mean'][idx] = meanEj
       self.data['Maximum'][idx] = maxEj
       if verbose:
-        print('Injection={0} -> Min={1} Mean={2} Max={3}'.format(
-          self.data['Injection'][idx], minEj, meanEj, maxEj))
+        print('Injected={0} -> Min={1} Mean={2} Max={3}'.format(
+          self.data['Injected'][idx], minEj, meanEj, maxEj))
 
     self.bounds = RateStats.PlotBounds()
 
@@ -729,13 +732,13 @@ class RateStats(object):
     colors = [cmap(idx) for idx in numpy.linspace(0, 1, lineCount)]
 
     # set axis labels
-    ax1.set_xlabel('Injection Rate')
-    ax1.set_ylabel('Ejection Rate')
+    ax1.set_xlabel('Injected Rate')
+    ax1.set_ylabel('Delivered Rate')
 
     # plot load vs. latency curves
     lines = []
     for idx, field in enumerate(reversed(RateStats.FIELDS)):
-      lines.append(ax1.plot(self.data['Injection'], self.data[field],
+      lines.append(ax1.plot(self.data['Injected'], self.data[field],
                             color=colors[idx], lw=1, label=field)[0])
 
     # if given, apply title
@@ -748,7 +751,7 @@ class RateStats(object):
                ncol=1)
 
     # set plot bounds
-    ax1.set_xlim(self.data['Injection'][0], self.data['Injection'][-1]);
+    ax1.set_xlim(self.data['Injected'][0], self.data['Injected'][-1]);
     ax1.set_ylim(self.bounds.ymin, self.bounds.ymax);
     ax1.xaxis.grid(True)
     ax1.yaxis.grid(True)
