@@ -75,9 +75,10 @@ def main(args):
   # plotting
   if args.verbose:
     print('plotting to {0} with title "{1}"'.format(args.filename, args.title))
-  ssplot.LoadLatencyStats.plotCompare(plt, args.filename, llstats, args.field,
-                                      args.label, title=args.title,
-                                      ymin=args.ymin, ymax=args.ymax)
+  ssplot.LoadLatencyStats.plotCompare(
+    plt, args.filename, llstats, args.field, args.label, title=args.title,
+    units=args.units, ymin=args.ymin, ymax=args.ymax)
+
   return 0
 
 if __name__ == '__main__':
@@ -97,6 +98,9 @@ if __name__ == '__main__':
                   help='the field to be plotted')
   ap.add_argument('--title', default='',
                   help='plot title')
+  ap.add_argument('--units', default=None,
+                  help='latency units')
+
   ap.add_argument('--label', action='append',
                   help='a label to a data set')
 

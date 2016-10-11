@@ -90,10 +90,11 @@ class GridStats(object):
     try:
       return self._map[row][col]
     except:
-      if not safe:
-        return float('inf')
-      else:
-        raise ValueError('row={0} col={1} doesn\'t exist'.format(row, col))
+      pass
+    if not safe:
+      return float('inf')
+    else:
+      raise ValueError('row={0} col={1} doesn\'t exist'.format(row, col))
 
 
 # a class to represent latency stats
@@ -198,8 +199,8 @@ class LatencyStats(object):
         line = fd.readline().decode('utf-8')
         delim = line.find(',')
         if (delim >= 0):
-          startTime = int(line[:delim])
-          endTime = int(line[delim+1:])
+          startTime = float(line[:delim])
+          endTime = float(line[delim+1:])
           self.times.append(startTime)
           self.latencies.append(endTime - startTime)
         else:
@@ -272,11 +273,15 @@ class LatencyStats(object):
               verticalalignment='center',
               horizontalalignment='center')
 
-  def scatterPlot(self, axes, showPercentiles=False, randomColors=False):
+  def scatterPlot(self, axes, showPercentiles=False, randomColors=False,
+                  units=None):
     # format axes
     axes.set_title('Latency scatter')
     axes.set_xlabel('Time')
-    axes.set_ylabel('Latency')
+    if units:
+      axes.set_ylabel('Latency ({0})'.format(units))
+    else:
+      axes.set_ylabel('Latency')
     axes.set_xlim(self.bounds.spxmin, self.bounds.spxmax)
     axes.set_ylim(self.bounds.spymin, self.bounds.spymax)
     axes.grid(True)
@@ -303,10 +308,13 @@ class LatencyStats(object):
     else:
       self.emptyPlot(axes, self.bounds.spxmid, self.bounds.spymid)
 
-  def pdfPlot(self, axes, showPercentiles=False):
+  def pdfPlot(self, axes, showPercentiles=False, units=None):
     # format axes
     axes.set_title('Probability density function')
-    axes.set_xlabel('Latency')
+    if units:
+      axes.set_xlabel('Latency ({0})'.format(units))
+    else:
+      axes.set_xlabel('Latency')
     axes.set_ylabel('Probability')
     axes.set_xlim(self.bounds.ppxmin, self.bounds.ppxmax)
     axes.set_ylim(self.bounds.ppymin, self.bounds.ppymax)
@@ -322,20 +330,24 @@ class LatencyStats(object):
         l99, = axes.plot([self.p99, self.p99], [0, 1], c='c')
         l999, = axes.plot([self.p999, self.p999], [0, 1], c='m')
         l9999, = axes.plot([self.p9999, self.p9999], [0, 1], c='y')
+        unitstr = ' ' + units if units else ''
         axes.legend((l50, l90, l99, l999, l9999),
-                    ('50th %ile    ({0})'.format(self.p50),
-                     '90th %ile    ({0})'.format(self.p90),
-                     '99th %ile    ({0})'.format(self.p99),
-                     '99.9th %ile  ({0})'.format(self.p999),
-                     '99.99th %ile ({0})'.format(self.p9999)),
+                    ('50th %ile    ({0:.3f}{1})'.format(self.p50, unitstr),
+                     '90th %ile    ({0:.3f}{1})'.format(self.p90, unitstr),
+                     '99th %ile    ({0:.3f}{1})'.format(self.p99, unitstr),
+                     '99.9th %ile  ({0:.3f}{1})'.format(self.p999, unitstr),
+                     '99.99th %ile ({0:.3f}{1})'.format(self.p9999, unitstr)),
                     fontsize=12)
     else:
       self.emptyPlot(axes, self.bounds.ppxmid, self.bounds.ppymid)
 
-  def cdfPlot(self, axes, showPercentiles=False):
+  def cdfPlot(self, axes, showPercentiles=False, units=None):
     # format axes
     axes.set_title('Cumulative distribution function')
-    axes.set_xlabel('Latency')
+    if units:
+      axes.set_xlabel('Latency ({0})'.format(units))
+    else:
+      axes.set_xlabel('Latency')
     axes.set_ylabel('Probability')
     axes.set_xlim(self.bounds.cpxmin, self.bounds.cpxmax)
     axes.set_ylim(self.bounds.cpymin, self.bounds.cpymax)
@@ -359,10 +371,13 @@ class LatencyStats(object):
     else:
       self.emptyPlot(axes, self.bounds.cpxmid, self.bounds.cpymid)
 
-  def cdfLogPlot(self, axes, xlog=False):
+  def cdfLogPlot(self, axes, xlog=False, units=None):
     # format axes
     axes.set_title('Logarithmic cumulative distribution function')
-    axes.set_xlabel('Latency')
+    if units:
+      axes.set_xlabel('Latency ({0})'.format(units))
+    else:
+      axes.set_xlabel('Latency')
     axes.set_ylabel('Percentile')
     axes.set_xlim(self.bounds.lpxmin, self.bounds.lpxmax)
     axes.set_yscale('percentile', nines=self.nines())
@@ -377,7 +392,7 @@ class LatencyStats(object):
     else:
       self.emptyPlot(axes, self.bounds.lpxmid, 0.999)
 
-  def quadPlot(self, plt, filename, title='',
+  def quadPlot(self, plt, filename, title='', units=None,
                spxmin=float('Nan'), spxmax=float('NaN'),
                spymin=float('Nan'), spymax=float('NaN'),
                ppxmin=float('Nan'), ppxmax=float('NaN'),
@@ -425,10 +440,10 @@ class LatencyStats(object):
     ax3 = fig.add_subplot(2, 2, 3)
     ax4 = fig.add_subplot(2, 2, 4)
 
-    self.scatterPlot(ax1, showPercentiles=True, randomColors=False)
-    self.pdfPlot(ax2, showPercentiles=True)
-    self.cdfPlot(ax3, showPercentiles=True)
-    self.cdfLogPlot(ax4, xlog=False)
+    self.scatterPlot(ax1, showPercentiles=True, randomColors=False, units=units)
+    self.pdfPlot(ax2, showPercentiles=True, units=units)
+    self.cdfPlot(ax3, showPercentiles=True, units=units)
+    self.cdfLogPlot(ax4, xlog=False, units=units)
 
     fig.tight_layout()
     if title:
@@ -511,7 +526,7 @@ class LoadLatencyStats(object):
         print('extracting {0}'.format(grid.filename))
       for key in self.data.keys():
         if key != 'Load':
-          s = grid.get(statRow, key, safe=True)
+          s = grid.get(statRow, key)
           if verbose:
             print('Load {0} {1} is {2}'.format(self.data['Load'][idx], key, s))
           self.data[key][idx] = s
@@ -521,7 +536,7 @@ class LoadLatencyStats(object):
     self.bounds.ymin = min(self.data['Minimum'])
     self.bounds.ymax = maxNoInfinity(self.data['Maximum'])
 
-  def plotAll(self, plt, filename, title='',
+  def plotAll(self, plt, filename, title='', units=None,
               ymin=float('Nan'), ymax=float('NaN')):
     if not math.isnan(ymin):
       self.bounds.ymin = ymin
@@ -539,7 +554,10 @@ class LoadLatencyStats(object):
 
     # set axis labels
     ax1.set_xlabel('Load')
-    ax1.set_ylabel('Latency')
+    if units:
+      ax1.set_ylabel('Latency ({0})'.format(units))
+    else:
+      ax1.set_ylabel('Latency')
 
     # plot load vs. latency curves
     lines = []
@@ -567,7 +585,7 @@ class LoadLatencyStats(object):
 
   @staticmethod
   def plotCompare(plt, filename, stats, field='Mean', labels=None, title='',
-                  ymin=float('NaN'), ymax=float('NaN')):
+                  units=None, ymin=float('NaN'), ymax=float('NaN')):
     # make sure the loads are all the same
     mload = stats[0].data['Load']
     for stat in stats:
@@ -589,7 +607,10 @@ class LoadLatencyStats(object):
 
     # set axis labels
     ax1.set_xlabel('Load')
-    ax1.set_ylabel('{0} Latency'.format(field))
+    if units:
+      ax1.set_ylabel('{0} Latency ({1})'.format(field, units))
+    else:
+      ax1.set_ylabel('{0} Latency'.format(field))
 
     # plot all lines
     lines = []

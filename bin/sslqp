@@ -49,6 +49,7 @@ def main(args):
 
   stats.quadPlot(plt, args.ofile,
                  title=args.title,
+                 units=args.units,
                  spxmin=args.spxmin, spxmax=args.spxmax,
                  spymin=args.spymin, spymax=args.spymax,
                  ppxmin=args.ppxmin, ppxmax=args.ppxmax,
@@ -72,6 +73,9 @@ if __name__ == '__main__':
 
   ap.add_argument('--title', default='',
                   help='plot title')
+  ap.add_argument('--units', default=None,
+                  help='latency units')
+
   ap.add_argument('--ibounds', default=None,
                   help='bounds input file')
   ap.add_argument('--obounds', default=None,

@@ -56,7 +56,7 @@ def main(args):
 
   if args.verbose:
     print('plotting to {0} with title "{1}"'.format(args.filename, args.title))
-  llstats.plotAll(plt, args.filename, title=args.title,
+  llstats.plotAll(plt, args.filename, title=args.title, units=args.units,
                   ymin=args.ymin, ymax=args.ymax)
 
   if args.obounds:
@@ -79,6 +79,9 @@ if __name__ == '__main__':
 
   ap.add_argument('--title', default='',
                   help='plot title')
+  ap.add_argument('--units', default=None,
+                  help='latency units')
+
   ap.add_argument('--ibounds', default=None,
                   help='bounds input file')
   ap.add_argument('--obounds', default=None,
