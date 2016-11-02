@@ -277,7 +277,10 @@ class LatencyStats(object):
                   units=None):
     # format axes
     axes.set_title('Latency scatter')
-    axes.set_xlabel('Time')
+    if units:
+      axes.set_xlabel('Time ({0})'.format(units))
+    else:
+      axes.set_xlabel('Time')
     if units:
       axes.set_ylabel('Latency ({0})'.format(units))
     else:
@@ -553,7 +556,7 @@ class LoadLatencyStats(object):
     colors = [cmap(idx) for idx in numpy.linspace(0, 1, lineCount)]
 
     # set axis labels
-    ax1.set_xlabel('Load')
+    ax1.set_xlabel('Load (%)')
     if units:
       ax1.set_ylabel('Latency ({0})'.format(units))
     else:
@@ -606,7 +609,7 @@ class LoadLatencyStats(object):
     colors = [cmap(idx) for idx in numpy.linspace(0, 1, lineCount)]
 
     # set axis labels
-    ax1.set_xlabel('Load')
+    ax1.set_xlabel('Load (%)')
     if units:
       ax1.set_ylabel('{0} Latency ({1})'.format(field, units))
     else:
