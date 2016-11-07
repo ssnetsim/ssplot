@@ -269,7 +269,7 @@ class LatencyStats(object):
     return nines
 
   def emptyPlot(self, axes, x, y):
-    axes.text(x, y, 'Saturated :(', clip_on=False, color='red',
+    axes.text(x, y, 'No data', clip_on=False, color='red',
               verticalalignment='center',
               horizontalalignment='center')
 
