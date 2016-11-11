@@ -37,6 +37,7 @@ import gzip
 import math
 import numpy
 import percentile
+import sys
 
 
 def maxNoInfinity(v):
@@ -107,6 +108,10 @@ class LatencyStats(object):
       self.spxmax = 1
       self.spymin = 0
       self.spymax = 1
+      self.apxmin = 0
+      self.apxmax = 1
+      self.apymin = 0
+      self.apymax = 1
       self.ppxmin = 0
       self.ppxmax = 1
       self.ppymin = 0
@@ -124,6 +129,8 @@ class LatencyStats(object):
       grid = GridStats(filename)
       self.spymin = grid.get('spy', 'min')
       self.spymax = grid.get('spy', 'max')
+      self.apymin = grid.get('apy', 'min')
+      self.apymax = grid.get('apy', 'max')
       self.ppxmin = grid.get('ppx', 'min')
       self.ppxmax = grid.get('ppx', 'max')
       self.ppymin = grid.get('ppy', 'min')
@@ -142,12 +149,14 @@ class LatencyStats(object):
       with opener(filename, 'w') as fd:
         print('axis,min,max\n'
               'spy,{0},{1}\n'
-              'ppx,{2},{3}\n'
-              'ppy,{4},{5}\n'
-              'cpx,{6},{7}\n'
-              'cpy,{8},{9}\n'
-              'lpx,{10},{11}\n'
+              'apy,{2},{3}\n'
+              'ppx,{4},{5}\n'
+              'ppy,{6},{7}\n'
+              'cpx,{8},{9}\n'
+              'cpy,{10},{11}\n'
+              'lpx,{12},{13}\n'
               .format(self.spymin, self.spymax,
+                      self.apymin, self.apymax,
                       self.ppxmin, self.ppxmax, self.ppymin, self.ppymax,
                       self.cpxmin, self.cpxmax, self.cpymin, self.cpymax,
                       self.lpxmin, self.lpxmax),
@@ -156,6 +165,8 @@ class LatencyStats(object):
     def setmid(self):
       self.spxmid = (self.spxmax - self.spxmin) / 2
       self.spymid = (self.spymax - self.spymin) / 2
+      self.apxmid = (self.apxmax - self.apxmin) / 2
+      self.apymid = (self.apymax - self.apymin) / 2
       self.ppxmid = (self.ppxmax - self.ppxmin) / 2
       self.ppymid = (self.ppymax - self.ppymin) / 2
       self.cpxmid = (self.cpxmax - self.cpxmin) / 2
@@ -176,6 +187,8 @@ class LatencyStats(object):
       new = LatencyStats.PlotBounds()
       new.spymin = min(self.spymin, other.spymin)
       new.spymax = max(self.spymax, other.spymax)
+      new.apymin = min(self.apymin, other.apymin)
+      new.apymax = max(self.apymax, other.apymax)
       new.ppxmin = min(self.ppxmin, other.ppxmin)
       new.ppxmax = max(self.ppxmax, other.ppxmax)
       new.ppymin = min(self.ppymin, other.ppymin)
@@ -207,6 +220,7 @@ class LatencyStats(object):
           break
       self.times = numpy.array(self.times)
       self.latencies = numpy.array(self.latencies)
+      assert len(self.times) == len(self.latencies)
 
     # size
     self.size = len(self.times)
@@ -218,6 +232,20 @@ class LatencyStats(object):
       self.smax = max(self.latencies)
       if self.smin < 0:
         raise Exception('latencies can\'t be negative!')
+
+      # compute time-bucketed averages
+      numBins = 100
+      binWidth = (self.tmax - self.tmin) / numBins
+      self.binTimes = numpy.linspace(self.tmin, self.tmax - binWidth, numBins)
+      self.binAverages = [0] * numBins
+      binCounts = [0] * numBins
+      for idx in range(len(self.latencies)):
+        sbin = math.floor((self.times[idx] - self.tmin) / binWidth)
+        sbin = min(numBins - 1, sbin)  # tmax causes sbin == numBins
+        self.binAverages[sbin] += self.latencies[idx]
+        binCounts[sbin] += 1
+      for idx in range(len(self.binAverages)):
+        self.binAverages[idx] /= binCounts[idx]
 
       # compute the probability density function
       self.pdfBins = 50
@@ -242,16 +270,26 @@ class LatencyStats(object):
       self.bounds.spxmax = self.tmax
       self.bounds.spymin = max(self.smin, 0)
       self.bounds.spymax = self.smax * 1.01
+
+      self.bounds.apxmin = self.tmin
+      self.bounds.apxmax = self.tmax
+      delta1p = (max(self.binAverages) - min(self.binAverages)) * 0.01
+      self.bounds.apymin = min(self.binAverages) - delta1p
+      self.bounds.apymax = max(self.binAverages) + delta1p
+
       self.bounds.ppxmin = self.smin
       self.bounds.ppxmax = self.smax
       self.bounds.ppymin = 0
       self.bounds.ppymax = max(self.pdfy) * 1.01
+
       self.bounds.cpxmin = self.smin
       self.bounds.cpxmax = self.smax
       self.bounds.cpymin = 0
       self.bounds.cpymax = 1
+
       self.bounds.lpxmin = self.smin * 0.999
       self.bounds.lpxmax = self.smax * 1.001
+
       self.bounds.setmid()
 
   def percentile(self, percent):
@@ -273,10 +311,11 @@ class LatencyStats(object):
               verticalalignment='center',
               horizontalalignment='center')
 
-  def scatterPlot(self, axes, showPercentiles=False, randomColors=False,
-                  units=None):
+  def generateScatter(self, axes, showPercentiles=False, randomColors=False,
+                      units=None, title=None):
     # format axes
-    axes.set_title('Latency scatter')
+    if title:
+      axes.set_title(title)
     if units:
       axes.set_xlabel('Time ({0})'.format(units))
     else:
@@ -311,9 +350,33 @@ class LatencyStats(object):
     else:
       self.emptyPlot(axes, self.bounds.spxmid, self.bounds.spymid)
 
-  def pdfPlot(self, axes, showPercentiles=False, units=None):
+  def generateAverage(self, axes, showPercentiles=False, units=None, title=None):
     # format axes
-    axes.set_title('Probability density function')
+    if title:
+      axes.set_title(title)
+    if units:
+      axes.set_xlabel('Time ({0})'.format(units))
+    else:
+      axes.set_xlabel('Time')
+    if units:
+      axes.set_ylabel('Mean Latency ({0})'.format(units))
+    else:
+      axes.set_ylabel('Mean Latency')
+    axes.set_xlim(self.bounds.apxmin, self.bounds.apxmax)
+    axes.set_ylim(self.bounds.apymin, self.bounds.apymax)
+    axes.grid(True)
+
+    # detect non-empty data set
+    if self.size > 0:
+      # create plot
+      axes.plot(self.binTimes, self.binAverages)
+    else:
+      self.emptyPlot(axes, self.bounds.apxmid, self.bounds.apymid)
+
+  def generatePdf(self, axes, showPercentiles=False, units=None, title=None):
+    # format axes
+    if title:
+      axes.set_title(title)
     if units:
       axes.set_xlabel('Latency ({0})'.format(units))
     else:
@@ -344,9 +407,10 @@ class LatencyStats(object):
     else:
       self.emptyPlot(axes, self.bounds.ppxmid, self.bounds.ppymid)
 
-  def cdfPlot(self, axes, showPercentiles=False, units=None):
+  def generateCdf(self, axes, showPercentiles=False, units=None, title=None):
     # format axes
-    axes.set_title('Cumulative distribution function')
+    if title:
+      axes.set_title(title)
     if units:
       axes.set_xlabel('Latency ({0})'.format(units))
     else:
@@ -374,9 +438,10 @@ class LatencyStats(object):
     else:
       self.emptyPlot(axes, self.bounds.cpxmid, self.bounds.cpymid)
 
-  def cdfLogPlot(self, axes, xlog=False, units=None):
+  def generateLogCdf(self, axes, xlog=False, units=None, title=None):
     # format axes
-    axes.set_title('Logarithmic cumulative distribution function')
+    if title:
+      axes.set_title(title)
     if units:
       axes.set_xlabel('Latency ({0})'.format(units))
     else:
@@ -395,7 +460,7 @@ class LatencyStats(object):
     else:
       self.emptyPlot(axes, self.bounds.lpxmid, 0.999)
 
-  def quadPlot(self, plt, filename, title='', units=None,
+  def quadPlot(self, plt, filename, title='', units=None, average=False,
                spxmin=float('Nan'), spxmax=float('NaN'),
                spymin=float('Nan'), spymax=float('NaN'),
                ppxmin=float('Nan'), ppxmax=float('NaN'),
@@ -443,15 +508,133 @@ class LatencyStats(object):
     ax3 = fig.add_subplot(2, 2, 3)
     ax4 = fig.add_subplot(2, 2, 4)
 
-    self.scatterPlot(ax1, showPercentiles=True, randomColors=False, units=units)
-    self.pdfPlot(ax2, showPercentiles=True, units=units)
-    self.cdfPlot(ax3, showPercentiles=True, units=units)
-    self.cdfLogPlot(ax4, xlog=False, units=units)
+    if not average:
+      self.generateScatter(ax1, showPercentiles=True, randomColors=False,
+                           units=units, title='Latency scatter')
+    else:
+      self.generateAverage(ax1, units=units, title='Latency average')
+    self.generatePdf(ax2, showPercentiles=True, units=units,
+                     title='Probability density function')
+    self.generateCdf(ax3, showPercentiles=True, units=units,
+                     title='Cumulative distribution function')
+    self.generateLogCdf(ax4, xlog=False, units=units,
+                        title='Logarithmic cumulative distribution function')
 
     fig.tight_layout()
     if title:
       fig.suptitle(title, fontsize=20)
       fig.subplots_adjust(top=0.92)
+    fig.savefig(filename)
+
+  def scatterPlot(self, plt, filename, title='', units=None,
+                  xmin=float('Nan'), xmax=float('NaN'),
+                  ymin=float('Nan'), ymax=float('NaN')):
+    if not math.isnan(xmin):
+      self.bounds.spxmin = xmin
+    if not math.isnan(xmax):
+      self.bounds.spxmax = xmax
+    if not math.isnan(ymin):
+      self.bounds.spymin = ymin
+    if not math.isnan(ymax):
+      self.bounds.spymax = ymax
+
+    self.bounds.setmid()
+
+    fig = plt.figure(figsize=(16, 10))
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    self.generateScatter(ax1, showPercentiles=True, randomColors=False,
+                         units=units, title=title)
+
+    fig.tight_layout()
+    fig.savefig(filename)
+
+  def averagePlot(self, plt, filename, title='', units=None,
+                  xmin=float('Nan'), xmax=float('NaN'),
+                  ymin=float('Nan'), ymax=float('NaN')):
+    if not math.isnan(xmin):
+      self.bounds.spxmin = xmin
+    if not math.isnan(xmax):
+      self.bounds.spxmax = xmax
+    if not math.isnan(ymin):
+      self.bounds.spymin = ymin
+    if not math.isnan(ymax):
+      self.bounds.spymax = ymax
+
+    self.bounds.setmid()
+
+    fig = plt.figure(figsize=(16, 10))
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    self.generateAverage(ax1, units=units, title=title)
+
+    fig.tight_layout()
+    fig.savefig(filename)
+
+  def pdfPlot(self, plt, filename, title='', units=None,
+              xmin=float('Nan'), xmax=float('NaN'),
+              ymin=float('Nan'), ymax=float('NaN')):
+    if not math.isnan(xmin):
+      self.bounds.ppxmin = xmin
+    if not math.isnan(xmax):
+      self.bounds.ppxmax = xmax
+    if not math.isnan(ymin):
+      self.bounds.ppymin = ymin
+    if not math.isnan(ymax):
+      self.bounds.ppymax = ymax
+
+    self.bounds.setmid()
+
+    fig = plt.figure(figsize=(16, 10))
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    self.generatePdf(ax1, showPercentiles=True, units=units, title=title)
+
+    fig.tight_layout()
+    fig.savefig(filename)
+
+  def cdfPlot(self, plt, filename, title='', units=None,
+              xmin=float('Nan'), xmax=float('NaN'),
+              ymin=float('Nan'), ymax=float('NaN')):
+    if not math.isnan(xmin):
+      self.bounds.cpxmin = xmin
+    if not math.isnan(xmax):
+      self.bounds.cpxmax = xmax
+    if not math.isnan(ymin):
+      self.bounds.cpymin = ymin
+    if not math.isnan(ymax):
+      self.bounds.cpymax = ymax
+
+    self.bounds.setmid()
+
+    fig = plt.figure(figsize=(16, 10))
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    self.generateCdf(ax1, showPercentiles=True, units=units, title=title)
+
+    fig.tight_layout()
+    fig.savefig(filename)
+
+  def logCdfPlot(self, plt, filename, title='', units=None,
+                 xmin=float('Nan'), xmax=float('NaN'),
+                 ymin=float('Nan'), ymax=float('NaN')):
+    if not math.isnan(xmin):
+      self.bounds.lpxmin = xmin
+    if not math.isnan(xmax):
+      self.bounds.lpxmax = xmax
+    if not math.isnan(ymin):
+      self.bounds.lpymin = ymin
+    if not math.isnan(ymax):
+      self.bounds.lpymax = ymax
+
+    self.bounds.setmid()
+
+    fig = plt.figure(figsize=(16, 10))
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    self.generateLogCdf(ax1, xlog=False, units=units, title=title)
+
+    fig.tight_layout()
     fig.savefig(filename)
 
 

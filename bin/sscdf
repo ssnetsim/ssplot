@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
  * Copyright (c) 2012-2016, Nic McDonald
  * All rights reserved.
@@ -29,45 +31,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-import codecs
-import re
+import argparse
 import os
+import ssplot
 import sys
 
-try:
-  from setuptools import setup
-except:
-  print('please install setuptools via pip:')
-  print('  <pip_exe> install setuptools')
-  sys.exit(-1)
-
-def find_version(*file_paths):
-  version_file = codecs.open(os.path.join(os.path.abspath(
-    os.path.dirname(__file__)), *file_paths), 'r').read()
-  version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                            version_file, re.M)
-  if version_match:
-    return version_match.group(1)
-  raise RuntimeError("Unable to find version string.")
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
-setup(
-  name='ssplot',
-  version=find_version('ssplot', '__init__.py'),
-  description='ssplot aggregate stats file Python wrapper',
-  author='Nic McDonald',
-  author_email='nicci02@hotmail.com',
-  license='BSD 3 Clause',
-  url='http://github.com/nicmcd/ssplot',
-  packages=['ssplot'],
-  scripts=['bin/ssscat',
-           'bin/ssave',
-           'bin/sspdf',
-           'bin/sscdf',
-           'bin/ssperc',
-           'bin/sslqp',
-           'bin/ssllp',
-           'bin/sslcp',
-           'bin/sslrp'],
-  install_requires=['percentile >= 1.0.2'],
-)
+def main(args):
+  stats = ssplot.LatencyStats(args.ifile)
+
+  if args.ibounds:
+    stats.bounds.readFile(args.ibounds)
+
+  stats.cdfPlot(plt, args.ofile,
+                title=args.title,
+                units=args.units,
+                xmin=args.xmin, xmax=args.xmax,
+                ymin=args.ymin, ymax=args.ymax)
+
+  if args.obounds:
+    stats.bounds.writeFile(args.obounds)
+
+  return 0
+
+
+if __name__ == '__main__':
+  ap = argparse.ArgumentParser()
+  ap.add_argument('ifile',
+                  help='input latency file')
+  ap.add_argument('ofile',
+                  help='output plot file')
+
+  ap.add_argument('--title', default='',
+                  help='plot title')
+  ap.add_argument('--units', default=None,
+                  help='latency units')
+
+  ap.add_argument('--ibounds', default=None,
+                  help='bounds input file')
+  ap.add_argument('--obounds', default=None,
+                  help='bounds output file')
+
+  ap.add_argument('--xmin', type=float, default=float('NaN'),
+                  help='CDF plot X-axis minimum')
+  ap.add_argument('--xmax', type=float, default=float('NaN'),
+                  help='CDF plot X-axis maximum')
+  ap.add_argument('--ymin', type=float, default=float('NaN'),
+                  help='CDF plot Y-axis minimum')
+  ap.add_argument('--ymax', type=float, default=float('NaN'),
+                  help='CDF plot Y-axis maximum')
+
+  args = ap.parse_args()
+  sys.exit(main(args))

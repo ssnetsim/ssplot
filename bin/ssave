@@ -47,17 +47,11 @@ def main(args):
   if args.ibounds:
     stats.bounds.readFile(args.ibounds)
 
-  stats.quadPlot(plt, args.ofile,
-                 title=args.title,
-                 units=args.units,
-                 average=args.average,
-                 spxmin=args.spxmin, spxmax=args.spxmax,
-                 spymin=args.spymin, spymax=args.spymax,
-                 ppxmin=args.ppxmin, ppxmax=args.ppxmax,
-                 ppymin=args.ppymin, ppymax=args.ppymax,
-                 cpxmin=args.cpxmin, cpxmax=args.cpxmax,
-                 cpymin=args.cpymin, cpymax=args.cpymax,
-                 lpxmin=args.lpxmin, lpxmax=args.lpxmax)
+  stats.averagePlot(plt, args.ofile,
+                    title=args.title,
+                    units=args.units,
+                    xmin=args.xmin, xmax=args.xmax,
+                    ymin=args.ymin, ymax=args.ymax)
 
   if args.obounds:
     stats.bounds.writeFile(args.obounds)
@@ -77,45 +71,19 @@ if __name__ == '__main__':
   ap.add_argument('--units', default=None,
                   help='latency units')
 
-  ap.add_argument('--average', default=False, action='store_true',
-                  help='Show latency average instead of scatter')
-
   ap.add_argument('--ibounds', default=None,
                   help='bounds input file')
   ap.add_argument('--obounds', default=None,
                   help='bounds output file')
 
-  ap.add_argument('--spxmin', type=float, default=float('NaN'),
+  ap.add_argument('--xmin', type=float, default=float('NaN'),
                   help='scatter plot X-axis minimum')
-  ap.add_argument('--spxmax', type=float, default=float('NaN'),
+  ap.add_argument('--xmax', type=float, default=float('NaN'),
                   help='scatter plot X-axis maximum')
-  ap.add_argument('--spymin', type=float, default=float('NaN'),
+  ap.add_argument('--ymin', type=float, default=float('NaN'),
                   help='scatter plot Y-axis minimum')
-  ap.add_argument('--spymax', type=float, default=float('NaN'),
+  ap.add_argument('--ymax', type=float, default=float('NaN'),
                   help='scatter plot Y-axis maximum')
-
-  ap.add_argument('--ppxmin', type=float, default=float('NaN'),
-                  help='PDF plot X-axis minimum')
-  ap.add_argument('--ppxmax', type=float, default=float('NaN'),
-                  help='PDF plot X-axis maximum')
-  ap.add_argument('--ppymin', type=float, default=float('NaN'),
-                  help='PDF plot Y-axis minimum')
-  ap.add_argument('--ppymax', type=float, default=float('NaN'),
-                  help='PDF plot Y-axis maximum')
-
-  ap.add_argument('--cpxmin', type=float, default=float('NaN'),
-                  help='CDF plot X-axis minimum')
-  ap.add_argument('--cpxmax', type=float, default=float('NaN'),
-                  help='CDF plot X-axis maximum')
-  ap.add_argument('--cpymin', type=float, default=float('NaN'),
-                  help='CDF plot Y-axis minimum')
-  ap.add_argument('--cpymax', type=float, default=float('NaN'),
-                  help='CDF plot Y-axis maximum')
-
-  ap.add_argument('--lpxmin', type=float, default=float('NaN'),
-                  help='log CDF plot X-axis minimum')
-  ap.add_argument('--lpxmax', type=float, default=float('NaN'),
-                  help='log CDF plot X-axis maximum')
 
   args = ap.parse_args()
   sys.exit(main(args))
