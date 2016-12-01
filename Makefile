@@ -4,7 +4,7 @@ PYPKG := ssplot
 .PHONY: help install clean
 
 help:
-	@echo "options are: install clean count"
+	@echo "options are: install clean"
 
 install:
 	python3 setup.py install --user

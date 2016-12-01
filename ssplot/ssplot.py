@@ -234,7 +234,7 @@ class LatencyStats(object):
         raise Exception('latencies can\'t be negative!')
 
       # compute time-bucketed averages
-      numBins = 100
+      numBins = 40
       binWidth = (self.tmax - self.tmin) / numBins
       self.binTimes = numpy.linspace(self.tmin, self.tmax - binWidth, numBins)
       self.binAverages = [0] * numBins
@@ -350,7 +350,8 @@ class LatencyStats(object):
     else:
       self.emptyPlot(axes, self.bounds.spxmid, self.bounds.spymid)
 
-  def generateAverage(self, axes, showPercentiles=False, units=None, title=None):
+  def generateAverage(self, axes, showPercentiles=False, units=None,
+                      title=None):
     # format axes
     if title:
       axes.set_title(title)
@@ -508,11 +509,8 @@ class LatencyStats(object):
     ax3 = fig.add_subplot(2, 2, 3)
     ax4 = fig.add_subplot(2, 2, 4)
 
-    if not average:
-      self.generateScatter(ax1, showPercentiles=True, randomColors=False,
-                           units=units, title='Latency scatter')
-    else:
-      self.generateAverage(ax1, units=units, title='Latency average')
+    self.generateScatter(ax1, showPercentiles=True, randomColors=False,
+                         units=units, title='Latency scatter')
     self.generatePdf(ax2, showPercentiles=True, units=units,
                      title='Probability density function')
     self.generateCdf(ax3, showPercentiles=True, units=units,
@@ -553,13 +551,13 @@ class LatencyStats(object):
                   xmin=float('Nan'), xmax=float('NaN'),
                   ymin=float('Nan'), ymax=float('NaN')):
     if not math.isnan(xmin):
-      self.bounds.spxmin = xmin
+      self.bounds.apxmin = xmin
     if not math.isnan(xmax):
-      self.bounds.spxmax = xmax
+      self.bounds.apxmax = xmax
     if not math.isnan(ymin):
-      self.bounds.spymin = ymin
+      self.bounds.apymin = ymin
     if not math.isnan(ymax):
-      self.bounds.spymax = ymax
+      self.bounds.apymax = ymax
 
     self.bounds.setmid()
 
