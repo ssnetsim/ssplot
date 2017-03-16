@@ -69,11 +69,16 @@ class GridStats(object):
 
     self._map = {}
     headerRow = None
+    self.num_cols = None
     for ridx, row in enumerate(rows):
       if ridx == 0:
         headerRow = row
         continue
       rowType = None
+      if self.num_cols == None:
+        self.num_cols = len(row)
+      elif self.num_cols != len(row):
+        raise ValueError('number of columns is not constant')
       for cidx, col in enumerate(row):
         try:
           val = int(col)
@@ -96,6 +101,10 @@ class GridStats(object):
       return float('inf')
     else:
       raise ValueError('row={0} col={1} doesn\'t exist'.format(row, col))
+
+  def sameSize(self, other):
+    return ((self.num_rows == other.num_rows) and
+            (self.num_cols == other.num_cols))
 
 
 # a class to represent latency stats
@@ -881,6 +890,12 @@ class RateStats(object):
 
 
   def __init__(self, start, stop, step, grids, **kwargs):
+    # check that all grids have the same structure
+    for grid in grids[1:]:
+      if not grid.sameSize(grids[0]):
+        raise ValueError('Grid from {0} doesn\'t match the structure from {1}'
+                         .format(grid, grids[0]))
+
     # create arrays
     injected = numpy.arange(start, stop, step)
     self.data = {'Injected': injected}
