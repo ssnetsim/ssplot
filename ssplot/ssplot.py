@@ -277,7 +277,7 @@ class LatencyStats(object):
     if self.size > 0:
       self.bounds.spxmin = self.tmin
       self.bounds.spxmax = self.tmax
-      self.bounds.spymin = max(self.smin, 0)
+      self.bounds.spymin = max(self.smin * 0.99, 0)
       self.bounds.spymax = self.smax * 1.01
 
       self.bounds.apxmin = self.tmin
@@ -334,7 +334,10 @@ class LatencyStats(object):
     else:
       axes.set_ylabel('Latency')
     axes.set_xlim(self.bounds.spxmin, self.bounds.spxmax)
-    axes.set_ylim(self.bounds.spymin, self.bounds.spymax)
+    if self.bounds.spymin == self.bounds.spymax:
+      axes.set_ylim(self.bounds.spymin-1, self.bounds.spymax+1)
+    else:
+      axes.set_ylim(self.bounds.spymin, self.bounds.spymax)
     axes.grid(True)
 
     # detect non-empty data set
@@ -392,7 +395,10 @@ class LatencyStats(object):
     else:
       axes.set_xlabel('Latency')
     axes.set_ylabel('Probability')
-    axes.set_xlim(self.bounds.ppxmin, self.bounds.ppxmax)
+    if self.bounds.ppxmin == self.bounds.ppxmax:
+      axes.set_xlim(self.bounds.ppxmin-1, self.bounds.ppxmax+1)
+    else:
+      axes.set_xlim(self.bounds.ppxmin, self.bounds.ppxmax)
     axes.set_ylim(self.bounds.ppymin, self.bounds.ppymax)
     axes.grid(True)
 
@@ -426,7 +432,10 @@ class LatencyStats(object):
     else:
       axes.set_xlabel('Latency')
     axes.set_ylabel('Probability')
-    axes.set_xlim(self.bounds.cpxmin, self.bounds.cpxmax)
+    if self.bounds.cpxmin == self.bounds.cpxmax:
+      axes.set_xlim(self.bounds.cpxmin-1, self.bounds.cpxmax+1)
+    else:
+      axes.set_xlim(self.bounds.cpxmin, self.bounds.cpxmax)
     axes.set_ylim(self.bounds.cpymin, self.bounds.cpymax)
     axes.grid(True)
 
