@@ -95,7 +95,8 @@ if __name__ == '__main__':
   ap.add_argument('--verbose', action='store_true',
                   help='print more info to output')
   ap.add_argument('--row', default='Packet',
-                  choices=['Packet', 'Message'],
-                  help='chooses whether to analyze packets or messages')
+                  choices=['Packet', 'Message', 'Transaction'],
+                  help='chooses whether to analyze packets, messages, or'
+                  'transactions')
   args = ap.parse_args()
   sys.exit(main(args))
