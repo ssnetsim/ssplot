@@ -253,8 +253,12 @@ class LatencyStats(object):
         sbin = min(numBins - 1, sbin)  # tmax causes sbin == numBins
         self.binAverages[sbin] += self.latencies[idx]
         binCounts[sbin] += 1
+      print('{}'.format(binCounts))
       for idx in range(len(self.binAverages)):
-        self.binAverages[idx] /= binCounts[idx]
+        if binCounts[idx] > 0:
+          self.binAverages[idx] /= binCounts[idx]
+        else:
+          self.binAverages[idx] = 0
 
       # compute the probability density function
       self.pdfBins = 50
