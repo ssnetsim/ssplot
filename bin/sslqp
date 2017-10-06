@@ -42,6 +42,12 @@ import matplotlib.pyplot as plt
 
 
 def main(args):
+  if args.size:
+    size=args.size
+    l = size.split('x')[0]
+    w = size.split('x')[1]
+    newsize = (float(l),float(w))
+
   stats = ssplot.LatencyStats(args.ifile)
 
   if args.ibounds:
@@ -57,7 +63,8 @@ def main(args):
                  ppymin=args.ppymin, ppymax=args.ppymax,
                  cpxmin=args.cpxmin, cpxmax=args.cpxmax,
                  cpymin=args.cpymin, cpymax=args.cpymax,
-                 lpxmin=args.lpxmin, lpxmax=args.lpxmax)
+                 lpxmin=args.lpxmin, lpxmax=args.lpxmax,
+                 size=newsize)
 
   if args.obounds:
     stats.bounds.writeFile(args.obounds)
@@ -76,6 +83,8 @@ if __name__ == '__main__':
                   help='plot title')
   ap.add_argument('--units', default=None,
                   help='latency units')
+  ap.add_argument('--size', type=str, default='16x10',
+                  help='size of plot, e.g., 16x10')
 
   ap.add_argument('--average', default=False, action='store_true',
                   help='Show latency average instead of scatter')

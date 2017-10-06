@@ -38,7 +38,9 @@ import math
 import numpy
 import percentile
 import sys
-
+#import itertools
+import random
+import matplotlib.ticker as ticker
 
 def maxNoInfinity(v):
   m = float('inf')
@@ -50,6 +52,63 @@ def maxNoInfinity(v):
         m = max(t, m)
   return m
 
+def setStyle(style, plt, lineCount):
+  lw = [1] * lineCount
+  lineStyles = ['solid'] * lineCount
+  # rainbow
+  if style == 'rainbow':
+    cmap = plt.get_cmap('gist_rainbow')
+    colors = [cmap(idx) for idx in numpy.linspace(0, 1, lineCount)]
+    markerStyles = ["None"] * lineCount
+    markerSize = [3] * lineCount
+  # rainbow-dots
+  elif style == 'rainbow-dots':
+    cmap = plt.get_cmap('gist_rainbow')
+    colors = [cmap(idx) for idx in numpy.linspace(0, 1, lineCount)]
+    markerStyles = ['o'] * lineCount
+    markerSize = [3] * lineCount
+  # inferno
+  elif style == 'inferno':
+    cmap = plt.get_cmap('inferno')
+    colors = [cmap(idx) for idx in numpy.linspace(0, 0.9, lineCount)]
+    lw = [2] * lineCount
+    markerStyles = ["None"] * lineCount
+    markerSize = [4] * lineCount
+  # inferno-dots
+  elif style == 'inferno-dots':
+    cmap = plt.get_cmap('inferno')
+    colors = [cmap(idx) for idx in numpy.linspace(0, 0.9, lineCount)]
+    lw = [2] * lineCount
+    markerStyles = ['o'] * lineCount
+    markerSize = [4] * lineCount
+  # black
+  elif style == 'black':
+    colors = ['k'] * lineCount
+    lines = ['solid','dashed','dashdot','dotted']
+    markers = ['o', '|','d', 'x', '^', 's', 'None']
+    #['o', 'v', '^','<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X']
+    styles = [(m, l) for l in lines for m in markers]
+    assert len(styles) > lineCount, 'Not enough marks for no. lines'
+    markerStyles = [s[0] for s in styles]
+    lineStyles = [s[1] for s in styles]
+    markerSize = [4] * lineCount
+  # inferno-markers
+  elif style == 'inferno-markers':
+    cmap = plt.get_cmap('inferno')
+    colors = [cmap(idx) for idx in numpy.linspace(0, 0.9, lineCount)]
+    lines = ['solid','dashed','dashdot','dotted']
+    markers = ['o', '|','d', 'x', '^', 's', 'None']
+    styles = [(m, l) for l in lines for m in markers]
+    assert len(styles) > lineCount, 'Not enough marks for no. lines'
+    markerStyles = [s[0] for s in styles]
+    lineStyles = [s[1] for s in styles]
+    markerSize = [4] * lineCount
+  else:
+    assert False, 'Unsupported style: {}'.format(style)
+
+  #create tuple
+  styleAll = zip(colors, lineStyles, lw, markerStyles, markerSize)
+  return list(styleAll)
 
 # a class to represent a stats file in a 2d grid in CSV format
 class GridStats(object):
@@ -105,7 +164,6 @@ class GridStats(object):
   def sameSize(self, other):
     return ((self.num_rows == other.num_rows) and
             (self.num_cols == other.num_cols))
-
 
 # a class to represent latency stats
 class LatencyStats(object):
@@ -253,7 +311,6 @@ class LatencyStats(object):
         sbin = min(numBins - 1, sbin)  # tmax causes sbin == numBins
         self.binAverages[sbin] += self.latencies[idx]
         binCounts[sbin] += 1
-      print('{}'.format(binCounts))
       for idx in range(len(self.binAverages)):
         if binCounts[idx] > 0:
           self.binAverages[idx] /= binCounts[idx]
@@ -422,8 +479,7 @@ class LatencyStats(object):
                      '90th %ile    ({0:.3f}{1})'.format(self.p90, unitstr),
                      '99th %ile    ({0:.3f}{1})'.format(self.p99, unitstr),
                      '99.9th %ile  ({0:.3f}{1})'.format(self.p999, unitstr),
-                     '99.99th %ile ({0:.3f}{1})'.format(self.p9999, unitstr)),
-                    fontsize=12)
+                     '99.99th %ile ({0:.3f}{1})'.format(self.p9999, unitstr)))
     else:
       self.emptyPlot(axes, self.bounds.ppxmid, self.bounds.ppymid)
 
@@ -490,7 +546,8 @@ class LatencyStats(object):
                ppymin=float('Nan'), ppymax=float('NaN'),
                cpxmin=float('Nan'), cpxmax=float('NaN'),
                cpymin=float('Nan'), cpymax=float('NaN'),
-               lpxmin=float('Nan'), lpxmax=float('NaN')):
+               lpxmin=float('Nan'), lpxmax=float('NaN'),
+               size=(16, 10)):
     if not math.isnan(spxmin):
       self.bounds.spxmin = spxmin
     if not math.isnan(spxmax):
@@ -525,7 +582,7 @@ class LatencyStats(object):
 
     self.bounds.setmid()
 
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=size)
     ax1 = fig.add_subplot(2, 2, 1)
     ax2 = fig.add_subplot(2, 2, 2)
     ax3 = fig.add_subplot(2, 2, 3)
@@ -542,13 +599,19 @@ class LatencyStats(object):
 
     fig.tight_layout()
     if title:
-      fig.suptitle(title, fontsize=20)
-      fig.subplots_adjust(top=0.92)
+      if (size[1] >= 8.0):
+        fig.suptitle(title, fontsize=20)
+      elif (size[1] < 8.0 and size[1] >= 6.0 ):
+        fig.suptitle(title)
+      elif (size[1] < 6.0 ):
+        assert False, ("Height not supported ", size[1])
+    fig.subplots_adjust(top=0.9)
     fig.savefig(filename)
 
   def scatterPlot(self, plt, filename, title='', units=None,
                   xmin=float('Nan'), xmax=float('NaN'),
-                  ymin=float('Nan'), ymax=float('NaN')):
+                  ymin=float('Nan'), ymax=float('NaN'),
+                  size=(16,10)):
     if not math.isnan(xmin):
       self.bounds.spxmin = xmin
     if not math.isnan(xmax):
@@ -560,7 +623,7 @@ class LatencyStats(object):
 
     self.bounds.setmid()
 
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=size)
     ax1 = fig.add_subplot(1, 1, 1)
 
     self.generateScatter(ax1, showPercentiles=True, randomColors=False,
@@ -571,7 +634,8 @@ class LatencyStats(object):
 
   def averagePlot(self, plt, filename, title='', units=None,
                   xmin=float('Nan'), xmax=float('NaN'),
-                  ymin=float('Nan'), ymax=float('NaN')):
+                  ymin=float('Nan'), ymax=float('NaN'),
+                  size=(16, 10)):
     if not math.isnan(xmin):
       self.bounds.apxmin = xmin
     if not math.isnan(xmax):
@@ -583,7 +647,7 @@ class LatencyStats(object):
 
     self.bounds.setmid()
 
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=size)
     ax1 = fig.add_subplot(1, 1, 1)
 
     self.generateAverage(ax1, units=units, title=title)
@@ -593,7 +657,8 @@ class LatencyStats(object):
 
   def pdfPlot(self, plt, filename, title='', units=None,
               xmin=float('Nan'), xmax=float('NaN'),
-              ymin=float('Nan'), ymax=float('NaN')):
+              ymin=float('Nan'), ymax=float('NaN'),
+              size=(16, 10)):
     if not math.isnan(xmin):
       self.bounds.ppxmin = xmin
     if not math.isnan(xmax):
@@ -605,7 +670,7 @@ class LatencyStats(object):
 
     self.bounds.setmid()
 
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=size)
     ax1 = fig.add_subplot(1, 1, 1)
 
     self.generatePdf(ax1, showPercentiles=True, units=units, title=title)
@@ -615,7 +680,8 @@ class LatencyStats(object):
 
   def cdfPlot(self, plt, filename, title='', units=None,
               xmin=float('Nan'), xmax=float('NaN'),
-              ymin=float('Nan'), ymax=float('NaN')):
+              ymin=float('Nan'), ymax=float('NaN'),
+              size=(16, 10)):
     if not math.isnan(xmin):
       self.bounds.cpxmin = xmin
     if not math.isnan(xmax):
@@ -627,7 +693,7 @@ class LatencyStats(object):
 
     self.bounds.setmid()
 
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=size)
     ax1 = fig.add_subplot(1, 1, 1)
 
     self.generateCdf(ax1, showPercentiles=True, units=units, title=title)
@@ -637,7 +703,8 @@ class LatencyStats(object):
 
   def logCdfPlot(self, plt, filename, title='', units=None,
                  xmin=float('Nan'), xmax=float('NaN'),
-                 ymin=float('Nan'), ymax=float('NaN')):
+                 ymin=float('Nan'), ymax=float('NaN'),
+                 size=(16, 10)):
     if not math.isnan(xmin):
       self.bounds.lpxmin = xmin
     if not math.isnan(xmax):
@@ -649,7 +716,7 @@ class LatencyStats(object):
 
     self.bounds.setmid()
 
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=size)
     ax1 = fig.add_subplot(1, 1, 1)
 
     self.generateLogCdf(ax1, xlog=False, units=units, title=title)
@@ -742,21 +809,21 @@ class LoadLatencyStats(object):
     self.bounds.ymin = min(self.data['Minimum'])
     self.bounds.ymax = maxNoInfinity(self.data['Maximum'])
 
+  # lplot
   def plotAll(self, plt, filename, title='', units=None,
-              ymin=float('Nan'), ymax=float('NaN')):
+              ymin=float('Nan'), ymax=float('NaN'),
+              style='rainbow', size=(16,10)):
     if not math.isnan(ymin):
       self.bounds.ymin = ymin
     if not math.isnan(ymax):
       self.bounds.ymax = ymax
 
     # create figure
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=size)
     ax1 = fig.add_subplot(1, 1, 1)
 
-    # create a colors list from a colormap
-    lineCount = len(LoadLatencyStats.FIELDS)
-    cmap = plt.get_cmap('gist_rainbow')
-    colors = [cmap(idx) for idx in numpy.linspace(0, 1, lineCount)]
+    # set plot styles
+    all_style = setStyle(style,plt,len(LoadLatencyStats.FIELDS))
 
     # set axis labels
     ax1.set_xlabel('Load (%)')
@@ -769,7 +836,12 @@ class LoadLatencyStats(object):
     lines = []
     for idx, field in enumerate(reversed(LoadLatencyStats.FIELDS)):
       lines.append(ax1.plot(self.data['Load'], self.data[field],
-                            color=colors[idx], lw=1, label=field)[0])
+                            color=all_style[idx][0],
+                            linestyle=all_style[idx][1],
+                            lw=all_style[idx][2],
+                            marker=all_style[idx][3],
+                            markersize=all_style[idx][4],
+                            label=field)[0])
 
     # if given, apply title
     if title:
@@ -777,21 +849,24 @@ class LoadLatencyStats(object):
 
     # create legend
     labels = [line.get_label() for line in lines]
-    ax1.legend(lines, labels, loc='upper left', fancybox=True, shadow=True,
-               ncol=1)
+    ax1.legend(lines, labels, loc='upper left', fancybox=True,
+               facecolor="white", edgecolor="black", ncol=1)
 
     # set plot bounds
     ax1.set_xlim(self.data['Load'][0], self.data['Load'][-1]);
     ax1.set_ylim(self.bounds.ymin, self.bounds.ymax);
-    ax1.xaxis.grid(True)
-    ax1.yaxis.grid(True)
+
+    ax1.xaxis.set_major_locator(ticker.MaxNLocator(10))
+    ax1.xaxis.set_minor_locator(ticker.MaxNLocator(20))
+    ax1.grid(True)
 
     fig.tight_layout()
     fig.savefig(filename)
 
   @staticmethod
   def plotCompare(plt, filename, stats, field='Mean', labels=None, title='',
-                  units=None, ymin=float('NaN'), ymax=float('NaN')):
+                  units=None, ymin=float('NaN'), ymax=float('NaN'),
+                  style='rainbow', size=(16,10)):
     # make sure the loads are all the same
     mload = stats[0].data['Load']
     for stat in stats:
@@ -803,13 +878,11 @@ class LoadLatencyStats(object):
     assert field in LoadLatencyStats.FIELDS
 
     # create figure
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=size)
     ax1 = fig.add_subplot(1, 1, 1)
 
-    # create a colors list from a colormap
-    lineCount = len(stats)
-    cmap = plt.get_cmap('gist_rainbow')
-    colors = [cmap(idx) for idx in numpy.linspace(0, 1, lineCount)]
+    # set plot styles
+    all_style = setStyle(style,plt,len(stats))
 
     # set axis labels
     ax1.set_xlabel('Load (%)')
@@ -821,22 +894,22 @@ class LoadLatencyStats(object):
     # plot all lines
     lines = []
     for idx, stat in enumerate(stats):
+      # label
       label = None
       if len(labels) > 0:
         label = labels[idx]
-      line, = ax1.plot(mload, stat.data[field], color=colors[idx], lw=1,
+      line, = ax1.plot(mload, stat.data[field],
+                       color=all_style[idx][0],
+                       linestyle=all_style[idx][1],
+                       lw=all_style[idx][2],
+                       marker=all_style[idx][3],
+                       markersize=all_style[idx][4],
                        label=label)
       lines.append(line)
 
     # if given, apply title
     if title:
       ax1.set_title(title, fontsize=20)
-
-    # create legend
-    if len(labels) > 0:
-      labels = [line.get_label() for line in lines]
-      ax1.legend(lines, labels, loc='upper left', fancybox=True, shadow=True,
-                 ncol=1)
 
     # set plot bounds
     ax1.set_xlim(stats[0].data['Load'][0], stats[0].data['Load'][-1]);
@@ -846,11 +919,20 @@ class LoadLatencyStats(object):
       ax1.set_ylim(bottom=ymin)
     elif not math.isnan(ymax):
       ax1.set_ylim(top=ymax)
+
+    # ticks and grid
+    ax1.xaxis.set_major_locator(ticker.MaxNLocator(10))
+    ax1.xaxis.set_minor_locator(ticker.MaxNLocator(20))
     ax1.grid(True)
+
+    # create legend
+    if len(labels) > 0:
+      labels = [line.get_label() for line in lines]
+      ax1.legend(lines, labels, loc='upper left', fancybox=True,
+                 facecolor="white", edgecolor="black", ncol=1)
 
     fig.tight_layout()
     fig.savefig(filename)
-
 
 # a class to represent rate stats
 class RateStats(object):
@@ -948,21 +1030,21 @@ class RateStats(object):
     self.bounds.ymin = min(self.data['Minimum'])
     self.bounds.ymax = maxNoInfinity(self.data['Maximum'])
 
+  # rplot
   def plotAll(self, plt, filename, title='',
-              ymin=float('Nan'), ymax=float('NaN')):
+              ymin=float('Nan'), ymax=float('NaN'),
+              style='rainbow', size=(16,10)):
     if not math.isnan(ymin):
       self.bounds.ymin = ymin
     if not math.isnan(ymax):
       self.bounds.ymax = ymax
 
     # create figure
-    fig = plt.figure(figsize=(16, 10))
+    fig = plt.figure(figsize=size)
     ax1 = fig.add_subplot(1, 1, 1)
 
-    # create a colors list from a colormap
-    lineCount = len(RateStats.FIELDS)
-    cmap = plt.get_cmap('gist_rainbow')
-    colors = [cmap(idx) for idx in numpy.linspace(0, 1, lineCount)]
+    # set plot styles
+    all_style = setStyle(style, plt, len(RateStats.FIELDS))
 
     # set axis labels
     ax1.set_xlabel('Injected Rate')
@@ -972,7 +1054,12 @@ class RateStats(object):
     lines = []
     for idx, field in enumerate(reversed(RateStats.FIELDS)):
       lines.append(ax1.plot(self.data['Injected'], self.data[field],
-                            color=colors[idx], lw=1, label=field)[0])
+                            color=all_style[idx][0],
+                            linestyle=all_style[idx][1],
+                            lw=all_style[idx][2],
+                            marker=all_style[idx][3],
+                            markersize=all_style[idx][4],
+                            label=field)[0])
 
     # if given, apply title
     if title:
@@ -980,14 +1067,15 @@ class RateStats(object):
 
     # create legend
     labels = [line.get_label() for line in lines]
-    ax1.legend(lines, labels, loc='upper left', fancybox=True, shadow=True,
-               ncol=1)
+    ax1.legend(lines, labels, loc='upper left', fancybox=True,
+               facecolor="white", edgecolor="black", ncol=1)
 
     # set plot bounds
     ax1.set_xlim(self.data['Injected'][0], self.data['Injected'][-1]);
     ax1.set_ylim(self.bounds.ymin, self.bounds.ymax);
-    ax1.xaxis.grid(True)
-    ax1.yaxis.grid(True)
+    ax1.xaxis.set_major_locator(ticker.MaxNLocator(10))
+    ax1.xaxis.set_minor_locator(ticker.MaxNLocator(20))
+    ax1.grid(True)
 
     fig.tight_layout()
     fig.savefig(filename)

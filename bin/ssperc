@@ -42,6 +42,12 @@ import matplotlib.pyplot as plt
 
 
 def main(args):
+  if args.size:
+    size=args.size
+    l = size.split('x')[0]
+    w = size.split('x')[1]
+    newsize = (float(l),float(w))
+
   stats = ssplot.LatencyStats(args.ifile)
 
   if args.ibounds:
@@ -50,7 +56,8 @@ def main(args):
   stats.logCdfPlot(plt, args.ofile,
                    title=args.title,
                    units=args.units,
-                   xmin=args.xmin, xmax=args.xmax)
+                   xmin=args.xmin, xmax=args.xmax,
+                   size=newsize)
 
   if args.obounds:
     stats.bounds.writeFile(args.obounds)
@@ -79,6 +86,9 @@ if __name__ == '__main__':
                   help='log CDF plot X-axis minimum')
   ap.add_argument('--xmax', type=float, default=float('NaN'),
                   help='log CDF plot X-axis maximum')
+
+  ap.add_argument('--size', type=str, default='16x10',
+                  help='size of plot, e.g., 16x10')
 
   args = ap.parse_args()
   sys.exit(main(args))

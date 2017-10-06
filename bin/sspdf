@@ -42,6 +42,12 @@ import matplotlib.pyplot as plt
 
 
 def main(args):
+  if args.size:
+    size=args.size
+    l = size.split('x')[0]
+    w = size.split('x')[1]
+    newsize = (float(l),float(w))
+
   stats = ssplot.LatencyStats(args.ifile)
 
   if args.ibounds:
@@ -51,7 +57,8 @@ def main(args):
                 title=args.title,
                 units=args.units,
                 xmin=args.xmin, xmax=args.xmax,
-                ymin=args.ymin, ymax=args.ymax)
+                ymin=args.ymin, ymax=args.ymax,
+                size=newsize)
 
   if args.obounds:
     stats.bounds.writeFile(args.obounds)
@@ -84,6 +91,9 @@ if __name__ == '__main__':
                   help='PDF plot Y-axis minimum')
   ap.add_argument('--ymax', type=float, default=float('NaN'),
                   help='PDF plot Y-axis maximum')
+
+  ap.add_argument('--size', type=str, default='16x10',
+                  help='size of plot, e.g., 16x10')
 
   args = ap.parse_args()
   sys.exit(main(args))

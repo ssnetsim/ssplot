@@ -42,6 +42,13 @@ import matplotlib.pyplot as plt
 
 
 def main(args):
+  # check input size
+  if args.size:
+    size=args.size
+    l = size.split('x')[0]
+    w = size.split('x')[1]
+    newsize = (float(l),float(w))
+
   stats = []
   for stat in args.stats:
     if args.verbose:
@@ -57,7 +64,8 @@ def main(args):
   if args.verbose:
     print('plotting to {0} with title "{1}"'.format(args.filename, args.title))
   rstats.plotAll(plt, args.filename, title=args.title,
-                 ymin=args.ymin, ymax=args.ymax)
+                 ymin=args.ymin, ymax=args.ymax, style=args.style,
+                 size=newsize)
 
   if args.obounds:
     rstats.bounds.writeFile(args.obounds)
@@ -88,6 +96,11 @@ if __name__ == '__main__':
                   help='latency Y-axis minimum')
   ap.add_argument('--ymax', type=float, default=float('NaN'),
                   help='latency Y-axis maximum')
+
+  ap.add_argument('--style', type=str, default='rainbow',
+                  help='style of plot: rainbow, rainbow-dots, black, inferno, inferno-markers')
+  ap.add_argument('--size', type=str, default='16x10',
+                  help='size of plot, e.g., 16x10')
 
   ap.add_argument('--verbose', action='store_true',
                   help='print more info to output')
