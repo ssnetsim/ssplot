@@ -84,8 +84,9 @@ def setStyle(style, plt, lineCount):
   # black
   elif style == 'black':
     colors = ['k'] * lineCount
-    lines = ['solid','dashed','dashdot','dotted']
-    markers = ['o', '|','d', 'x', '^', 's', 'None']
+    lines = ['solid', 'dashed','dashdot','dotted']
+    markers = ['s', '^', 'o', 'd', 'x', '|', 'None']
+    # markers = ['o', '|','d', 'x', '^', 's', 'None']
     #['o', 'v', '^','<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X']
     styles = [(m, l) for l in lines for m in markers]
     assert len(styles) > lineCount, 'Not enough marks for no. lines'
@@ -95,9 +96,9 @@ def setStyle(style, plt, lineCount):
   # inferno-markers
   elif style == 'inferno-markers':
     cmap = plt.get_cmap('inferno')
-    colors = [cmap(idx) for idx in numpy.linspace(0, 0.9, lineCount)]
+    colors = [cmap(idx) for idx in numpy.linspace(0.1, 0.9, lineCount)]
     lines = ['solid','dashed','dashdot','dotted']
-    markers = ['o', '|','d', 'x', '^', 's', 'None']
+    markers = ['s', '^', 'o', 'd', 'x', '|', 'None']
     styles = [(m, l) for l in lines for m in markers]
     assert len(styles) > lineCount, 'Not enough marks for no. lines'
     markerStyles = [s[0] for s in styles]
@@ -840,6 +841,7 @@ class LoadLatencyStats(object):
                             linestyle=all_style[idx][1],
                             lw=all_style[idx][2],
                             marker=all_style[idx][3],
+                            markevery=5,
                             markersize=all_style[idx][4],
                             label=field)[0])
 
@@ -903,6 +905,7 @@ class LoadLatencyStats(object):
                        linestyle=all_style[idx][1],
                        lw=all_style[idx][2],
                        marker=all_style[idx][3],
+                       markevery=5,
                        markersize=all_style[idx][4],
                        label=label)
       lines.append(line)
@@ -929,7 +932,7 @@ class LoadLatencyStats(object):
     if len(labels) > 0:
       labels = [line.get_label() for line in lines]
       ax1.legend(lines, labels, loc='upper left', fancybox=True,
-                 facecolor="white", edgecolor="black", ncol=1)
+                 facecolor="white", edgecolor="black", ncol=3)
 
     fig.tight_layout()
     fig.savefig(filename)
