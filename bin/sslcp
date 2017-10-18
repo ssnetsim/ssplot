@@ -32,15 +32,15 @@
 """
 
 import argparse
+import gridstats
 import math
 import numpy
 import os
 import ssplot
 import sys
 
-if 'DISPLAY' not in os.environ or os.environ['DISPLAY'] == '':
-  import matplotlib
-  matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
@@ -54,19 +54,19 @@ def main(args):
     return -1
   dataSets = len(args.stats) // gridsPerSet
 
-  # check input size
-  if args.size:
-    size=args.size
-    l = size.split('x')[0]
-    w = size.split('x')[1]
-    newsize = (float(l),float(w))
+  # format size
+  width = args.size.split('x')[0]
+  height = args.size.split('x')[1]
+  newsize = (float(width), float(height))
 
   # read in all stats
   stats = []
   for stat in args.stats:
     if args.verbose:
       print('parsing {0}'.format(stat))
-    stats.append(ssplot.GridStats(stat))
+    gs = gridstats.GridStats()
+    gs.read(stat)
+    stats.append(gs)
 
   llstats = []
   for idx in range(dataSets):

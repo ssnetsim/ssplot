@@ -42,16 +42,11 @@ import matplotlib.pyplot as plt
 
 
 def main(args):
-  if args.size:
-    size=args.size
-    l = size.split('x')[0]
-    w = size.split('x')[1]
-    newsize = (float(l),float(w))
+  width = args.size.split('x')[0]
+  height = args.size.split('x')[1]
+  newsize = (float(width), float(height))
 
   stats = ssplot.LatencyStats(args.ifile)
-
-  if args.ibounds:
-    stats.bounds.readFile(args.ibounds)
 
   stats.pdfPlot(plt, args.ofile,
                 title=args.title,
@@ -59,10 +54,6 @@ def main(args):
                 xmin=args.xmin, xmax=args.xmax,
                 ymin=args.ymin, ymax=args.ymax,
                 size=newsize)
-
-  if args.obounds:
-    stats.bounds.writeFile(args.obounds)
-
   return 0
 
 
@@ -77,11 +68,6 @@ if __name__ == '__main__':
                   help='plot title')
   ap.add_argument('--units', default=None,
                   help='latency units')
-
-  ap.add_argument('--ibounds', default=None,
-                  help='bounds input file')
-  ap.add_argument('--obounds', default=None,
-                  help='bounds output file')
 
   ap.add_argument('--xmin', type=float, default=float('NaN'),
                   help='PDF plot X-axis minimum')

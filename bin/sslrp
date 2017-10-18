@@ -42,12 +42,9 @@ import matplotlib.pyplot as plt
 
 
 def main(args):
-  # check input size
-  if args.size:
-    size=args.size
-    l = size.split('x')[0]
-    w = size.split('x')[1]
-    newsize = (float(l),float(w))
+  width = args.size.split('x')[0]
+  height = args.size.split('x')[1]
+  newsize = (float(width), float(height))
 
   stats = []
   for stat in args.stats:
@@ -58,18 +55,11 @@ def main(args):
   rstats = ssplot.RateStats(
     args.start, args.stop, args.step, stats, verbose=args.verbose)
 
-  if args.ibounds:
-    rstats.bounds.readFile(args.ibounds)
-
   if args.verbose:
     print('plotting to {0} with title "{1}"'.format(args.filename, args.title))
   rstats.plotAll(plt, args.filename, title=args.title,
                  ymin=args.ymin, ymax=args.ymax, style=args.style,
                  size=newsize)
-
-  if args.obounds:
-    rstats.bounds.writeFile(args.obounds)
-
   return 0
 
 if __name__ == '__main__':
@@ -87,10 +77,6 @@ if __name__ == '__main__':
 
   ap.add_argument('--title', default='',
                   help='plot title')
-  ap.add_argument('--ibounds', default=None,
-                  help='bounds input file')
-  ap.add_argument('--obounds', default=None,
-                  help='bounds output file')
 
   ap.add_argument('--ymin', type=float, default=float('NaN'),
                   help='latency Y-axis minimum')
@@ -98,7 +84,8 @@ if __name__ == '__main__':
                   help='latency Y-axis maximum')
 
   ap.add_argument('--style', type=str, default='rainbow',
-                  help='style of plot: rainbow, rainbow-dots, black, inferno, inferno-markers')
+                  help=('style of plot: rainbow, rainbow-dots, black, inferno, '
+                        'inferno-markers'))
   ap.add_argument('--size', type=str, default='16x10',
                   help='size of plot, e.g., 16x10')
 

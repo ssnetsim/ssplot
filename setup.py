@@ -69,5 +69,6 @@ setup(
            'bin/ssllp',
            'bin/sslcp',
            'bin/sslrp'],
-  install_requires=['percentile >= 1.0.2'],
+  install_requires=['percentile >= 1.0.2',
+                    'gridstats >= 1.0.0'],
 )

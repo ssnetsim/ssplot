@@ -32,6 +32,7 @@
 """
 
 import argparse
+import gridstats
 import os
 import ssplot
 import sys
@@ -42,34 +43,26 @@ import matplotlib.pyplot as plt
 
 
 def main(args):
-  # check input size
-  if args.size:
-    size=args.size
-    l = size.split('x')[0]
-    w = size.split('x')[1]
-    newsize = (float(l),float(w))
+  width = args.size.split('x')[0]
+  height = args.size.split('x')[1]
+  newsize = (float(width), float(height))
 
   stats = []
   for stat in args.stats:
     if args.verbose:
       print('parsing {0}'.format(stat))
-    stats.append(ssplot.GridStats(stat))
+    gs = gridstats.GridStats()
+    gs.read(stat)
+    stats.append(gs)
 
   llstats = ssplot.LoadLatencyStats(
     args.start, args.stop, args.step, stats, verbose=args.verbose, row=args.row)
-
-  if args.ibounds:
-    llstats.bounds.readFile(args.ibounds)
 
   if args.verbose:
     print('plotting to {0} with title "{1}"'.format(args.filename, args.title))
   llstats.plotAll(plt, args.filename, title=args.title, units=args.units,
                   ymin=args.ymin, ymax=args.ymax, style=args.style,
-                  size=newsize)
-
-  if args.obounds:
-    llstats.bounds.writeFile(args.obounds)
-
+                  size=newsize, nomin=args.nomin)
   return 0
 
 if __name__ == '__main__':
@@ -89,11 +82,8 @@ if __name__ == '__main__':
                   help='plot title')
   ap.add_argument('--units', default=None,
                   help='latency units')
-
-  ap.add_argument('--ibounds', default=None,
-                  help='bounds input file')
-  ap.add_argument('--obounds', default=None,
-                  help='bounds output file')
+  ap.add_argument('--nomin', action='store_true',
+                  help='don\'t plot minimum latency')
 
   ap.add_argument('--ymin', type=float, default=float('NaN'),
                   help='latency Y-axis minimum')
@@ -101,7 +91,8 @@ if __name__ == '__main__':
                   help='latency Y-axis maximum')
 
   ap.add_argument('--style', type=str, default='rainbow',
-                  help='style of plot: rainbow, rainbow-dots, black, inferno, inferno-markers')
+                  help=('style of plot: rainbow, rainbow-dots, black, inferno, '
+                        'inferno-markers'))
   ap.add_argument('--size', type=str, default='16x10',
                   help='size of plot, e.g., 16x10')
 
