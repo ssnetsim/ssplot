@@ -280,8 +280,9 @@ class LatencyStats(object):
         line = fd.readline().decode('utf-8')
         delim = line.find(',')
         if (delim >= 0):
-          startTime = float(line[:delim])
-          endTime = float(line[delim+1:])
+          cols = line.split(',')
+          startTime = float(cols[0])
+          endTime = float(cols[1])
           self.times.append(startTime)
           self.latencies.append(endTime - startTime)
         else:
