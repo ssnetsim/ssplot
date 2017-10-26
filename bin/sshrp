@@ -47,22 +47,36 @@ def main(args):
   height = args.size.split('x')[1]
   newsize = (float(width), float(height))
 
-  stats = []
-  for stat in args.stats:
+  # rates
+  rStats = []
+  for stat in args.rstats:
     if args.verbose:
       print('parsing {0}'.format(stat))
     gs = gridstats.GridStats()
     gs.read(stat)
-    stats.append(gs)
+    rStats.append(gs)
 
-  rstats = ssplot.RateStats(
-    args.start, args.stop, args.step, stats, verbose=args.verbose)
+  rate = ssplot.RateStats(
+    args.start, args.stop, args.step, rStats, verbose=args.verbose)
 
+  # hops
+  hStats = []
+  for stat in args.hstats:
+    if args.verbose:
+      print('parsing {0}'.format(stat))
+    gs = gridstats.GridStats()
+    gs.read(stat)
+    hStats.append(gs)
+
+  hops = ssplot.LoadHopsStats(
+    args.start, args.stop, args.step, hStats, verbose=args.verbose)
+
+  # plot
   if args.verbose:
-    print('plotting to {0}"'.format(args.filename))
-  rstats.plotAll(plt, args.filename, title=args.title,
-                 ymin=args.ymin, ymax=args.ymax, style=args.style,
-                 size=newsize)
+    print('plotting to {0}'.format(args.filename))
+  ssplot.plotRateHops(rate, hops, plt, args.filename, title=args.title,
+               ymin=args.ymin, ymax=args.ymax, style=args.style,
+               size=newsize)
   return 0
 
 if __name__ == '__main__':
@@ -75,17 +89,18 @@ if __name__ == '__main__':
                   help='stopping load value (exclusive)')
   ap.add_argument('step', type=float,
                   help='load step size')
-  ap.add_argument('stats', metavar='F', type=str, nargs='+',
-                  help='stats file to parse')
+
+  ap.add_argument('--rstats', type=str, nargs='+',
+                  help='rate stats file to parse')
+  ap.add_argument('--hstats', type=str, nargs='+',
+                  help='hop stats file to parse')
 
   ap.add_argument('--title', default='',
                   help='plot title')
-
   ap.add_argument('--ymin', type=float, default=float('NaN'),
                   help='latency Y-axis minimum')
   ap.add_argument('--ymax', type=float, default=float('NaN'),
                   help='latency Y-axis maximum')
-
   ap.add_argument('--style', type=str, default='rainbow',
                   help=('style of plot: rainbow, rainbow-dots, black, inferno, '
                         'inferno-markers'))

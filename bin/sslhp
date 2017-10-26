@@ -47,22 +47,22 @@ def main(args):
   height = args.size.split('x')[1]
   newsize = (float(width), float(height))
 
-  stats = []
-  for stat in args.stats:
+  hops = []
+  for hopfile in args.hops:
     if args.verbose:
-      print('parsing {0}'.format(stat))
+      print('parsing {0}'.format(hopfile))
     gs = gridstats.GridStats()
-    gs.read(stat)
-    stats.append(gs)
+    gs.read(hopfile)
+    hops.append(gs)
 
-  rstats = ssplot.RateStats(
-    args.start, args.stop, args.step, stats, verbose=args.verbose)
+  lhops = ssplot.LoadHopsStats(
+    args.start, args.stop, args.step, hops, verbose=args.verbose)
 
   if args.verbose:
     print('plotting to {0}"'.format(args.filename))
-  rstats.plotAll(plt, args.filename, title=args.title,
-                 ymin=args.ymin, ymax=args.ymax, style=args.style,
-                 size=newsize)
+  lhops.plotPercent(plt, args.filename, title=args.title,
+                    ymin=args.ymin, ymax=args.ymax, style=args.style,
+                    size=newsize)
   return 0
 
 if __name__ == '__main__':
@@ -75,12 +75,11 @@ if __name__ == '__main__':
                   help='stopping load value (exclusive)')
   ap.add_argument('step', type=float,
                   help='load step size')
-  ap.add_argument('stats', metavar='F', type=str, nargs='+',
-                  help='stats file to parse')
+  ap.add_argument('hops', metavar='F', type=str, nargs='+',
+                  help='hops file to parse')
 
   ap.add_argument('--title', default='',
                   help='plot title')
-
   ap.add_argument('--ymin', type=float, default=float('NaN'),
                   help='latency Y-axis minimum')
   ap.add_argument('--ymax', type=float, default=float('NaN'),
@@ -94,5 +93,6 @@ if __name__ == '__main__':
 
   ap.add_argument('--verbose', action='store_true',
                   help='print more info to output')
+
   args = ap.parse_args()
   sys.exit(main(args))

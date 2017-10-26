@@ -42,6 +42,78 @@ import sys
 import random
 import matplotlib.ticker as ticker
 
+def plotRateHops(rateStats, loadHopsStats,
+                 plt, filename, title='',
+                  ymin=float('NaN'), ymax=float('NaN'),
+                  style='rainbow', size=(16,10)):
+
+  assert rateStats.start == loadHopsStats.start
+  assert rateStats.stop == loadHopsStats.stop
+  assert rateStats.step == loadHopsStats.step
+  assert len(rateStats.data['Injected']) == len(loadHopsStats.data['Load'])
+
+  perMinHopData = loadHopsStats.data['PerMinimal']
+  perNonMinHopData = loadHopsStats.data['PerNonMinimal']
+  meanRate = copy.copy(rateStats.data['Mean'])
+  # plotting data
+  data = {'Injected':rateStats.data['Injected']}
+  fields = ['Mean','Minimal', 'NonMinimal']
+  data['Mean'] = meanRate
+  data['Minimal'] = numpy.multiply(meanRate, perMinHopData)
+  data['NonMinimal'] = numpy.multiply(meanRate, perNonMinHopData)
+
+  # ylim
+  if math.isnan(ymin):
+    ymin = min(data['NonMinimal'])
+  if math.isnan(ymax):
+    ymax = max(data['Mean'])
+
+  # create figure
+  fig = plt.figure(figsize=size)
+  ax1 = fig.add_subplot(1, 1, 1)
+
+    # set plot styles
+  all_style = setStyle(style, plt, len(fields))
+
+  # set axis labels
+  ax1.set_xlabel('Injected Rate (%)')
+  ax1.set_ylabel('Delivered Rate (%)')
+
+  # plot load vs. latency curves
+  lines = []
+  for idx, field in enumerate(fields):
+    lines.append(ax1.plot(data['Injected'], data[field],
+                          linestyle=all_style[idx][1],
+                          lw=all_style[idx][2],
+                          marker=all_style[idx][3],
+                          markevery=1,
+                          markersize=all_style[idx][4],
+                          label=field)[0])
+
+  # if given, apply title
+  if title:
+    ax1.set_title(title, fontsize=20)
+
+  # create legend
+  labels = [line.get_label() for line in lines]
+  ax1.legend(lines, labels, loc='upper left', fancybox=True,
+             facecolor="white", edgecolor="black", ncol=1)
+
+  # set plot bounds
+  ax1.set_xlim(data['Injected'][0], data['Injected'][-1]);
+  ax1.set_ylim(ymin, ymax)
+
+  # ticks
+  ax1.xaxis.set_major_locator(ticker.MaxNLocator(10))
+  ax1.xaxis.set_minor_locator(ticker.MaxNLocator(20))
+
+  # grid
+  ax1.grid(True)
+  ax1.set_axisbelow(True)
+
+  fig.tight_layout()
+  fig.savefig(filename)
+
 def maxNoInfinity(v):
   m = float('inf')
   for t in v:
@@ -614,7 +686,7 @@ class LoadLatencyStats(object):
       assert isinstance(grid, gridstats.GridStats), \
         "grids must be GridStats"
       if verbose:
-        print('extracting {0}'.format(grid.filename))
+        print('extracting grid {0}'.format(idx))
       for key in self.data.keys():
         if key != 'Load':
           s = grid.get(statRow, key)
@@ -629,7 +701,7 @@ class LoadLatencyStats(object):
     if math.isnan(ymin):
       ymin = min(self.data['Minimum'])
     if math.isnan(ymax):
-      ymax = maxNoInfinity(self.data['Maximum'])
+      ymax = max(self.data['Maximum'])
 
     # create figure
     fig = plt.figure(figsize=size)
@@ -672,6 +744,167 @@ class LoadLatencyStats(object):
     # set plot bounds
     ax1.set_xlim(self.data['Load'][0], self.data['Load'][-1]);
     ax1.set_ylim(ymin, ymax);
+
+    # ticks
+    ax1.xaxis.set_major_locator(ticker.MaxNLocator(10))
+    ax1.xaxis.set_minor_locator(ticker.MaxNLocator(20))
+
+    # grid
+    ax1.grid(True)
+    ax1.set_axisbelow(True)
+
+    fig.tight_layout()
+    fig.savefig(filename)
+
+  # a class to represent load vs. Hop % stats
+class LoadHopsStats(object):
+
+  FIELDS = ['AveHops','AveMinHops','AveNonMinHops',
+            'PerMinimal', 'PerNonMinimal']
+
+  def __init__(self, start, stop, step, grids, **kwargs):
+    self.start = start
+    self.stop = stop
+    self.step = step
+
+    # create arrays
+    load = numpy.arange(start, stop, step)
+    self.data = {'Load': load}
+
+    for field in LoadHopsStats.FIELDS:
+      self.data[field] = numpy.empty(len(load), dtype=float)
+
+    # parse kwargs
+    verbose = kwargs.get('verbose', False);
+
+    if verbose:
+      print('load {0}'.format(self.data['Load']))
+
+    assert len(grids) == len(self.data['Load']), "wrong number of grids"
+
+    # load data arrays
+    for idx, grid in enumerate(grids):
+      assert isinstance(grid, gridstats.GridStats), \
+        "grids must be GridStats"
+      if verbose:
+        print('extracting grid {0}'.format(idx))
+      for key in self.data.keys():
+        if key != 'Load':
+          s = grid.get('Packet', key)
+          if verbose:
+            print('Load {0} {1} is {2}'.format(self.data['Load'][idx], key, s))
+          self.data[key][idx] = s
+
+  # hlplot % min/nonmin
+  def plotPercent(self, plt, filename, title='',
+                  ymin=float('NaN'), ymax=float('NaN'),
+                  style='rainbow', size=(16,10)):
+
+    # create figure
+    fig = plt.figure(figsize=size)
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    # set plot styles
+    fieldsAll = LoadHopsStats.FIELDS
+    fields = []
+    for f in fieldsAll:
+      if "Per" in f:
+        fields.append(f)
+    all_style = setStyle(style, plt, len(fields))
+
+    if math.isnan(ymin):
+      ymin = min(self.data['PerNonMinimal'])
+    if math.isnan(ymax):
+      ymax = max(self.data['PerMinimal'])
+
+    # set axis labels
+    ax1.set_xlabel('Load (%)')
+    ax1.set_ylabel('Percent Hops')
+
+    # plot curves
+    lines = []
+    for idx, field in enumerate(fields):
+      lines.append(ax1.plot(self.data['Load'], self.data[field],
+                            linestyle=all_style[idx][1],
+                            lw=all_style[idx][2],
+                            marker=all_style[idx][3],
+                            markevery=1,
+                            markersize=all_style[idx][4],
+                            label=field)[0])
+
+    # if given, apply title
+    if title:
+      ax1.set_title(title, fontsize=20)
+
+    # create legend
+    labels = [line.get_label() for line in lines]
+    ax1.legend(lines, labels, loc='upper left', fancybox=True,
+               facecolor="white", edgecolor="black", ncol=1)
+
+    # set plot bounds
+    ax1.set_xlim(self.data['Load'][0], self.data['Load'][-1]);
+    ax1.set_ylim(ymin, ymax)
+
+    # ticks
+    ax1.xaxis.set_major_locator(ticker.MaxNLocator(10))
+    ax1.xaxis.set_minor_locator(ticker.MaxNLocator(20))
+
+    # grid
+    ax1.grid(True)
+    ax1.set_axisbelow(True)
+
+    fig.tight_layout()
+    fig.savefig(filename)
+
+  # hlplot ave hops (total, min and nonmin)
+  def plotAveHops(self, plt, filename, title='',
+                  ymin=float('NaN'), ymax=float('NaN'),
+                  style='rainbow', size=(16,10)):
+
+        # create figure
+    fig = plt.figure(figsize=size)
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    # set plot styles
+    fieldsAll = LoadHopsStats.FIELDS
+    fields = []
+    for f in fieldsAll:
+      if "Ave" in f:
+        fields.append(f)
+    all_style = setStyle(style, plt, len(fields))
+
+    if math.isnan(ymin):
+      ymin = min(self.data['AveNonMinHops'])
+    if math.isnan(ymax):
+      ymax = max(self.data['AveHops'])
+
+    # set axis labels
+    ax1.set_xlabel('Load (%)')
+    ax1.set_ylabel('Average No. of Hops')
+
+    # plot load vs. latency curves
+    lines = []
+    for idx, field in enumerate(fields):
+      lines.append(ax1.plot(self.data['Load'], self.data[field],
+                            linestyle=all_style[idx][1],
+                            lw=all_style[idx][2],
+                            marker=all_style[idx][3],
+                            markevery=1,
+                            markersize=all_style[idx][4],
+                            label=field)[0])
+
+    # if given, apply title
+    if title:
+      ax1.set_title(title, fontsize=20)
+
+    # create legend
+    labels = [line.get_label() for line in lines]
+    ax1.legend(lines, labels, loc='upper left', fancybox=True,
+               facecolor="white", edgecolor="black", ncol=1)
+
+    # set plot bounds
+    ax1.set_xlim(self.data['Load'][0], self.data['Load'][-1]);
+    ax1.set_ylim(ymin, ymax)
 
     # ticks
     ax1.xaxis.set_major_locator(ticker.MaxNLocator(10))
@@ -765,12 +998,16 @@ class RateStats(object):
   FIELDS = ['Minimum', 'Mean', 'Maximum']
 
   def __init__(self, start, stop, step, grids, **kwargs):
-    # check that all grids have the same structure
-    for grid in grids[1:]:
-      if not grid.sameSize(grids[0]):
-        raise ValueError('Grid from {0} doesn\'t match the structure from {1}'
-                         .format(grid, grids[0]))
+    # check that all the grids are the same size
+    for idx, grid in enumerate(grids[1:]):
+      assert len(grid.columnNames()) == len(grids[0].columnNames()), (
+        "grid {0} and {1} don't have the same #cols".format(0, idx+1))
+      assert len(grid.rowNames()) == len(grids[0].rowNames()), (
+        "grid {0} and {1} don't have the same #rows".format(0, idx+1))
 
+    self.start = start
+    self.stop = stop
+    self.step = step
     # create arrays
     injected = numpy.arange(start, stop, step)
     self.data = {'Injected': injected}
@@ -789,11 +1026,12 @@ class RateStats(object):
       assert isinstance(grid, gridstats.GridStats), \
         "grids must be GridStats"
       if verbose:
-        print('extracting {0}'.format(grid.filename))
+        print('extracting grid {0}'.format(idx))
       # extract delivered
       delivered = []
-      for term in range(0, grid.num_rows - 1):
-        delivered.append(grid.get(term, 'delivered', safe=True) * 100)
+      for term in range(0, len(grid.rowNames()) - 1):
+        delivered.append(grid.get(term, 'delivered'))
+
       # compute stats
       minEj = min(delivered)
       meanEj = sum(delivered) / len(delivered)
@@ -810,10 +1048,6 @@ class RateStats(object):
   def plotAll(self, plt, filename, title='',
               ymin=float('NaN'), ymax=float('NaN'),
               style='rainbow', size=(16,10)):
-    if math.isnan(ymin):
-      ymin = min(self.data['Minimum'])
-    if math.isnan(ymax):
-      ymax = maxNoInfinity(self.data['Maximum'])
 
     # create figure
     fig = plt.figure(figsize=size)
@@ -823,8 +1057,13 @@ class RateStats(object):
     all_style = setStyle(style, plt, len(RateStats.FIELDS))
 
     # set axis labels
-    ax1.set_xlabel('Injected Rate')
-    ax1.set_ylabel('Delivered Rate')
+    ax1.set_xlabel('Injected Rate (%)')
+    ax1.set_ylabel('Delivered Rate (%)')
+
+    if math.isnan(ymin):
+      ymin = min(self.data['Minimum'])
+    if math.isnan(ymax):
+      ymax = max(self.data['Maximum'])
 
     # plot load vs. latency curves
     lines = []
