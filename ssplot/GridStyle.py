@@ -29,37 +29,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-__version__ = '1.0.0'
+class GridStyle(object):
+  """
+  This is a grid style generator
+  """
 
-from .utils import *
-from .consts import *
+  __grid_styles = {
+    'dotted': {'linestyle': ':', 'lw': 1},
+    'dashed': {'linestyle': '--', 'lw': 1},
+    'solid': {'linestyle': '-', 'lw': 1},
+    'dashdot': {'linestyle': '-.', 'lw': 1}
+  }
 
-# data classes
-from .SampleStats import SampleStats
-from .LoadLatencyStats import LoadLatencyStats
-from .LoadRateStats import LoadRateStats
-from .LoadHopsStats import LoadHopsStats
+  @staticmethod
+  def default():
+    return 'dotted'
 
-# utility classes
-from .PlotStyle import PlotStyle
-from .GridStyle import GridStyle
-from .FigureSize import FigureSize
-from .LatencyPlot import LatencyPlot
-from .MultilinePlot import MultilinePlot
+  @staticmethod
+  def styles():
+    return set(GridStyle.__grid_styles.keys())
 
-# these are the commandline interfaces
-from .CommandLine import CommandLine
-from .TimeLatencyScatter import TimeLatencyScatter
-from .LatencyPdf import LatencyPdf
-from .LatencyCdf import LatencyCdf
-from .LatencyPercentile import LatencyPercentile
-from .LoadLatency import LoadLatency
-from .LoadLatencyCompare import LoadLatencyCompare
-from .LoadRate import LoadRate
-#from .LoadRateVariance import LoadRateVariance    # loadratevar lrv (MAYBE or StdDev)
-from .LoadRatePercent import LoadRatePercent
-from .LoadPercentMinimal import LoadPercentMinimal
-from .LoadAverageHops import LoadAverageHops
-from .TimePercentMinimal import TimePercentMinimal
-from .TimeAverageHops import TimeAverageHops
-from .TimeLatency import TimeLatency
+  @staticmethod
+  def style(name):
+    assert name in GridStyle.__grid_styles, 'invalid grid style name'
+    return GridStyle.__grid_styles[name]

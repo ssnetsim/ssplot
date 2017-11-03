@@ -29,37 +29,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-__version__ = '1.0.0'
+def str_to_bool(strbool):
+  assert isinstance(strbool, str)
+  if strbool.lower() in ['true', 't', 'yes', 'y', '1']:
+    return True
+  elif strbool.lower() in ['false', 'f', 'no', 'n', '0']:
+    return False
+  else:
+    raise ValueError('invalid boolean string: {}'.format(strbool))
 
-from .utils import *
-from .consts import *
 
-# data classes
-from .SampleStats import SampleStats
-from .LoadLatencyStats import LoadLatencyStats
-from .LoadRateStats import LoadRateStats
-from .LoadHopsStats import LoadHopsStats
-
-# utility classes
-from .PlotStyle import PlotStyle
-from .GridStyle import GridStyle
-from .FigureSize import FigureSize
-from .LatencyPlot import LatencyPlot
-from .MultilinePlot import MultilinePlot
-
-# these are the commandline interfaces
-from .CommandLine import CommandLine
-from .TimeLatencyScatter import TimeLatencyScatter
-from .LatencyPdf import LatencyPdf
-from .LatencyCdf import LatencyCdf
-from .LatencyPercentile import LatencyPercentile
-from .LoadLatency import LoadLatency
-from .LoadLatencyCompare import LoadLatencyCompare
-from .LoadRate import LoadRate
-#from .LoadRateVariance import LoadRateVariance    # loadratevar lrv (MAYBE or StdDev)
-from .LoadRatePercent import LoadRatePercent
-from .LoadPercentMinimal import LoadPercentMinimal
-from .LoadAverageHops import LoadAverageHops
-from .TimePercentMinimal import TimePercentMinimal
-from .TimeAverageHops import TimeAverageHops
-from .TimeLatency import TimeLatency
+def empty_text(axes, x, y):
+  """
+  This generates an empty plot when data isn't available
+  """
+  axes.text(x, y, 'No data', clip_on=False, color='red',
+            verticalalignment='center',
+            horizontalalignment='center')

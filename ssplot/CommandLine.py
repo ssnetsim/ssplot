@@ -29,37 +29,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-__version__ = '1.0.0'
+import copy
 
-from .utils import *
-from .consts import *
+class CommandLine(object):
+  """
+  This class is the abstract interface definition for a command line interface.
+  """
 
-# data classes
-from .SampleStats import SampleStats
-from .LoadLatencyStats import LoadLatencyStats
-from .LoadRateStats import LoadRateStats
-from .LoadHopsStats import LoadHopsStats
+  @staticmethod
+  def create_parser(subparser):
+    """
+    This function adds a parser to the subparser object according to the
+    specific command line interface implementation.
+    """
+    raise NotImplementedError('subclasses must override this')
 
-# utility classes
-from .PlotStyle import PlotStyle
-from .GridStyle import GridStyle
-from .FigureSize import FigureSize
-from .LatencyPlot import LatencyPlot
-from .MultilinePlot import MultilinePlot
+  @staticmethod
+  def run_command(args, plt):
+    """
+    This function is used to run the command if it is chosen at the command
+    line. This function should be registered to the parser in create_parser().
+    """
+    raise NotImplementedError('subclasses must override this')
 
-# these are the commandline interfaces
-from .CommandLine import CommandLine
-from .TimeLatencyScatter import TimeLatencyScatter
-from .LatencyPdf import LatencyPdf
-from .LatencyCdf import LatencyCdf
-from .LatencyPercentile import LatencyPercentile
-from .LoadLatency import LoadLatency
-from .LoadLatencyCompare import LoadLatencyCompare
-from .LoadRate import LoadRate
-#from .LoadRateVariance import LoadRateVariance    # loadratevar lrv (MAYBE or StdDev)
-from .LoadRatePercent import LoadRatePercent
-from .LoadPercentMinimal import LoadPercentMinimal
-from .LoadAverageHops import LoadAverageHops
-from .TimePercentMinimal import TimePercentMinimal
-from .TimeAverageHops import TimeAverageHops
-from .TimeLatency import TimeLatency
+  # this is a mapping of all names (class->names)
+  _names = {}
+
+  @staticmethod
+  def register(cls):
+    # gather names
+    primary_name = cls.NAME
+    aliases = cls.ALIASES
+
+    # create a set to hold all
+    all_names = [primary_name] + aliases
+
+    # check current names against all new names
+    for new_name in all_names:
+      for pname in CommandLine._names:
+        assert new_name is not pname, '{} already exists'.format(new_name)
+        for alias in CommandLine._names[pname]:
+          assert new_name is not alias, '{} already exists'.format(new_name)
+
+    # add to map
+    CommandLine._names[cls] = all_names
+
+  @staticmethod
+  def command_lines():
+    return set(CommandLine._names.keys())
+
+  @staticmethod
+  def all_names():
+    return copy.copy(CommandLine._names)

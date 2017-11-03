@@ -29,37 +29,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-__version__ = '1.0.0'
+import ssplot
 
-from .utils import *
-from .consts import *
+class LatencyPdf(ssplot.CommandLine):
+  """
+  This class is a command line interface to generate a latency probability
+  density function plot.
+  """
 
-# data classes
-from .SampleStats import SampleStats
-from .LoadLatencyStats import LoadLatencyStats
-from .LoadRateStats import LoadRateStats
-from .LoadHopsStats import LoadHopsStats
+  NAME = 'latency-pdf'
+  ALIASES = ['latpdf', 'lp']
 
-# utility classes
-from .PlotStyle import PlotStyle
-from .GridStyle import GridStyle
-from .FigureSize import FigureSize
-from .LatencyPlot import LatencyPlot
-from .MultilinePlot import MultilinePlot
+  @staticmethod
+  def create_parser(subparser):
+    sp = subparser.add_parser(LatencyPdf.NAME,
+                              aliases=LatencyPdf.ALIASES,
+                              help=('Generate a latency probability density '
+                                    'function plot'))
+    sp.set_defaults(func=LatencyPdf.run_command)
 
-# these are the commandline interfaces
-from .CommandLine import CommandLine
-from .TimeLatencyScatter import TimeLatencyScatter
-from .LatencyPdf import LatencyPdf
-from .LatencyCdf import LatencyCdf
-from .LatencyPercentile import LatencyPercentile
-from .LoadLatency import LoadLatency
-from .LoadLatencyCompare import LoadLatencyCompare
-from .LoadRate import LoadRate
-#from .LoadRateVariance import LoadRateVariance    # loadratevar lrv (MAYBE or StdDev)
-from .LoadRatePercent import LoadRatePercent
-from .LoadPercentMinimal import LoadPercentMinimal
-from .LoadAverageHops import LoadAverageHops
-from .TimePercentMinimal import TimePercentMinimal
-from .TimeAverageHops import TimeAverageHops
-from .TimeLatency import TimeLatency
+    sp.add_argument('ifile',
+                    help='input latency file')
+    sp.add_argument('plotfile',
+                    help='output plot file')
+
+    ssplot.LatencyPlot.add_args(LatencyPdf.NAME, sp)
+
+  @staticmethod
+  def run_command(args, plt):
+    # create a sample stats object of latencies
+    lstats = ssplot.SampleStats(args.ifile)
+
+    # plot
+    lp = ssplot.LatencyPlot(plt, LatencyPdf.NAME, lstats)
+    lp.plot(args.plotfile, args)
+
+    return 0
+
+ssplot.CommandLine.register(LatencyPdf)

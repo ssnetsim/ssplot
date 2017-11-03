@@ -29,37 +29,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-__version__ = '1.0.0'
+import gridstats
+import numpy
 
-from .utils import *
-from .consts import *
+class LoadLatencyStats(object):
+  """
+  This class holds load versus latency statistics. It is a simple class that
+  contains the data from one load sweep.
+  """
 
-# data classes
-from .SampleStats import SampleStats
-from .LoadLatencyStats import LoadLatencyStats
-from .LoadRateStats import LoadRateStats
-from .LoadHopsStats import LoadHopsStats
+  FIELDS = ['Minimum', 'Mean', 'Median', '90th%', '99th%', '99.9th%',
+            '99.99th%', '99.999th%', 'Maximum']
 
-# utility classes
-from .PlotStyle import PlotStyle
-from .GridStyle import GridStyle
-from .FigureSize import FigureSize
-from .LatencyPlot import LatencyPlot
-from .MultilinePlot import MultilinePlot
+  def __init__(self, start, stop, step, grids, row='Packet'):
+    # save incase someone needs to check these
+    self.start = start
+    self.stop = stop
+    self.step = step
 
-# these are the commandline interfaces
-from .CommandLine import CommandLine
-from .TimeLatencyScatter import TimeLatencyScatter
-from .LatencyPdf import LatencyPdf
-from .LatencyCdf import LatencyCdf
-from .LatencyPercentile import LatencyPercentile
-from .LoadLatency import LoadLatency
-from .LoadLatencyCompare import LoadLatencyCompare
-from .LoadRate import LoadRate
-#from .LoadRateVariance import LoadRateVariance    # loadratevar lrv (MAYBE or StdDev)
-from .LoadRatePercent import LoadRatePercent
-from .LoadPercentMinimal import LoadPercentMinimal
-from .LoadAverageHops import LoadAverageHops
-from .TimePercentMinimal import TimePercentMinimal
-from .TimeAverageHops import TimeAverageHops
-from .TimeLatency import TimeLatency
+    # create arrays
+    load = numpy.arange(start, stop, step)
+    self.data = {'Load': load}
+    for field in LoadLatencyStats.FIELDS:
+      self.data[field] = numpy.empty(len(load), dtype=float)
+
+    # verify stat row and number of grids
+    assert row in ['Packet', 'Message', 'Transaction']
+    assert len(grids) == len(self.data['Load']), 'wrong number of grids'
+
+    # load data arrays
+    for idx, grid in enumerate(grids):
+      assert isinstance(grid, gridstats.GridStats), 'grids must be GridStats'
+      for key in self.data.keys():
+        if key != 'Load':
+          self.data[key][idx] = grid.get(row, key)

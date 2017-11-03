@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,37 +31,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-__version__ = '1.0.0'
+import argparse
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
-from .utils import *
-from .consts import *
+import ssplot
 
-# data classes
-from .SampleStats import SampleStats
-from .LoadLatencyStats import LoadLatencyStats
-from .LoadRateStats import LoadRateStats
-from .LoadHopsStats import LoadHopsStats
+if __name__ == '__main__':
+  # start an argparser and subparsers
+  ap = argparse.ArgumentParser(description='SSPlot: Plotting for SuperSim')
+  sp = ap.add_subparsers(title='plotting commands', dest='cmd',
+                         description='plots type available in SSPlot',
+                         help='the plot type')
+  sp.required = True
 
-# utility classes
-from .PlotStyle import PlotStyle
-from .GridStyle import GridStyle
-from .FigureSize import FigureSize
-from .LatencyPlot import LatencyPlot
-from .MultilinePlot import MultilinePlot
+  # each command line interface needs to add a parser
+  for cls in ssplot.CommandLine.command_lines():
+    cls.create_parser(sp)
 
-# these are the commandline interfaces
-from .CommandLine import CommandLine
-from .TimeLatencyScatter import TimeLatencyScatter
-from .LatencyPdf import LatencyPdf
-from .LatencyCdf import LatencyCdf
-from .LatencyPercentile import LatencyPercentile
-from .LoadLatency import LoadLatency
-from .LoadLatencyCompare import LoadLatencyCompare
-from .LoadRate import LoadRate
-#from .LoadRateVariance import LoadRateVariance    # loadratevar lrv (MAYBE or StdDev)
-from .LoadRatePercent import LoadRatePercent
-from .LoadPercentMinimal import LoadPercentMinimal
-from .LoadAverageHops import LoadAverageHops
-from .TimePercentMinimal import TimePercentMinimal
-from .TimeAverageHops import TimeAverageHops
-from .TimeLatency import TimeLatency
+  # parse the args and call the corresponding command function
+  args = ap.parse_args()
+  args.func(args, plt)
