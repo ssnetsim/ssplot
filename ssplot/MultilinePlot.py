@@ -158,7 +158,7 @@ class MultilinePlot(object):
     self._legend_columns = value
 
   def set_legend_title(self, value):
-    self._legend_title = r'$\bf{{{}}}$'.format(value)
+    self._legend_title = value
 
   def set(self, **kwargs):
     for k in kwargs:
