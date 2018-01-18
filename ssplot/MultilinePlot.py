@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 import matplotlib.ticker
-
+import math
 import ssplot
 
 class MultilinePlot(object):
@@ -327,7 +327,7 @@ class MultilinePlot(object):
     yspan = ymax - ymin
 
     # figure out where markers should be placed (target 20 markers)
-    mark_every = max(1, (len(self._xdata) * 5) // int(xspan))
+    mark_every = math.ceil((int(xspan) / (self._xdata[1]-self._xdata[0])) / 20)
 
     # plot the lines
     if len(self._xdata) > 0:
