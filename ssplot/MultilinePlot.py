@@ -73,6 +73,10 @@ class MultilinePlot(object):
     self._legend_location = 'upper left'
     self._legend_columns = 1
     self._legend_title = None
+    self._xscale = None
+    self._yscale = None
+    self._xticklabels_verbose = False
+    self._yticklabels_verbose = False
 
   def set_plot_style(self, value):
     assert value in ssplot.PlotStyle.styles()
@@ -160,6 +164,18 @@ class MultilinePlot(object):
   def set_legend_title(self, value):
     self._legend_title = value
 
+  def set_xscale(self, value):
+    self._xscale = value
+
+  def set_yscale(self, value):
+    self._yscale = value
+
+  def set_xticklabels_verbose(self, value):
+    self._xticklabels_verbose = bool(value)
+
+  def set_yticklabels_verbose(self, value):
+    self._yticklabels_verbose = bool(value)
+
   def set(self, **kwargs):
     for k in kwargs:
       value = kwargs[k]
@@ -239,6 +255,20 @@ class MultilinePlot(object):
     if 'legend_title' not in skip:
       parser.add_argument('--legend_title', type=str,
                           help='the title of the legend')
+    if 'xscale' not in skip:
+      parser.add_argument('--xscale', type=str,
+                          help='the scale of the x-axis')
+    if 'yscale' not in skip:
+      parser.add_argument('--yscale', type=str,
+                          help='the scale of the y-axis')
+    if 'xticklabels_verbose' not in skip:
+      parser.add_argument('--xticklabels_verbose', type=ssplot.str_to_bool,
+                          help='whether or not to turn x-axis ticklabels '
+                          'verbose')
+    if 'yticklabels_verbose' not in skip:
+      parser.add_argument('--yticklabels_verbose', type=ssplot.str_to_bool,
+                          help='whether or not to turn y-axis ticklabels '
+                          'verbose')
 
   def apply_args(self, args, *skip):
     for s in skip:
@@ -287,6 +317,16 @@ class MultilinePlot(object):
       self.set_legend_columns(args.legend_columns)
     if 'legend_title' not in skip and args.legend_title is not None:
       self.set_legend_title(args.legend_title)
+    if 'xscale' not in skip and args.xscale is not None:
+      self.set_xscale(args.xscale)
+    if 'yscale' not in skip and args.yscale is not None:
+      self.set_yscale(args.yscale)
+    if ('xticklabels_verbose' not in skip and
+        args.xticklabels_verbose is not None):
+      self.set_xticklabels_verbose(args.xticklabels_verbose)
+    if ('yticklabels_verbose' not in skip and
+        args.yticklabels_verbose is not None):
+      self.set_yticklabels_verbose(args.yticklabels_verbose)
 
   def plot(self, plotfile):
     # create figure
@@ -361,7 +401,7 @@ class MultilinePlot(object):
     if self._ylabel is not None:
       ax.set_ylabel(self._ylabel)
 
-    # create legent
+    # create legend
     if self._data_labels is not None:
       ax.legend(
         loc=self._legend_location,
@@ -395,10 +435,33 @@ class MultilinePlot(object):
       ax.yaxis.grid(True, **grid_kwargs)
     ax.set_axisbelow(True)
 
+    # set axis scales
+    if self._xscale is not None:
+      if self._xscale is 'log':
+        ax.set_xscale('log')
+      elif self._xscale.startswith('log'):
+        ax.set_xscale('log', basex=int(self._xscale[3:]))
+      else:
+        ax.set_xscale(self._xscale)
+    if self._yscale is not None:
+      if self._yscale is 'log':
+        ax.set_yscale('log')
+      elif self._yscale.startswith('log'):
+        ax.set_yscale('log', basey=int(self._yscale[3:]))
+      else:
+        ax.set_yscale(self._yscale)
+
+    # verbose tick labels
+    if self._xticklabels_verbose:
+      ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+      ax.ticklabel_format(axis='x', style='plain', useOffset=False)
+    if self._yticklabels_verbose:
+      ax.yaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+      ax.ticklabel_format(axis='y', style='plain', useOffset=False)
+
     # generate the plot
     fig.tight_layout()
     fig.savefig(plotfile)
-
 
 MultilinePlot._kwargs = {
   'plot_style': MultilinePlot.set_plot_style,
@@ -421,5 +484,9 @@ MultilinePlot._kwargs = {
   'yminor_ticks': MultilinePlot.set_yminor_ticks,
   'legend_location': MultilinePlot.set_legend_location,
   'legend_columns': MultilinePlot.set_legend_columns,
-  'legend_title': MultilinePlot.set_legend_title
+  'legend_title': MultilinePlot.set_legend_title,
+  'xscale': MultilinePlot.set_xscale,
+  'yscale': MultilinePlot.set_yscale,
+  'xticklabels_verbose': MultilinePlot.set_xticklabels_verbose,
+  'yticklabels_verbose': MultilinePlot.set_yticklabels_verbose
 }
