@@ -127,6 +127,40 @@ def infernoMarkers(plt, line_count):
   return colors, line_styles, line_widths, marker_styles, marker_sizes
 PlotStyle.registerStyle('inferno-markers', infernoMarkers)
 
+def plasma(plt, line_count):
+  line_widths = [1.5] * line_count
+  line_styles = ['solid'] * line_count
+  cmap = plt.get_cmap('plasma')
+  colors = [cmap(idx) for idx in numpy.linspace(0, 0.9, line_count)]
+  marker_styles = ["None"] * line_count
+  marker_sizes = [4] * line_count
+  return colors, line_styles, line_widths, marker_styles, marker_sizes
+PlotStyle.registerStyle('plasma', plasma)
+
+def plasmaDots(plt, line_count):
+  line_widths = [1.5] * line_count
+  line_styles = ['solid'] * line_count
+  cmap = plt.get_cmap('plasma')
+  colors = [cmap(idx) for idx in numpy.linspace(0, 0.9, line_count)]
+  marker_styles = ['o'] * line_count
+  marker_sizes = [4] * line_count
+  return colors, line_styles, line_widths, marker_styles, marker_sizes
+PlotStyle.registerStyle('plasma-dots', plasmaDots)
+
+def plasmaMarkers(plt, line_count):
+  line_widths = [1] * line_count
+  cmap = plt.get_cmap('plasma')
+  colors = [cmap(idx) for idx in numpy.linspace(0.0, 0.9, line_count)]
+  line_styles = ['solid','dashed','dashdot','dotted']
+  marker_styles = ['s', '^', 'o', 'd', 'x', '|', 'None']
+  marker_line_styles = [(m, l) for l in line_styles for m in marker_styles]
+  assert len(marker_line_styles) > line_count, 'Too many lines for plot style'
+  marker_styles = [s[0] for s in marker_line_styles]
+  line_styles = [s[1] for s in marker_line_styles]
+  marker_sizes = [4] * line_count
+  return colors, line_styles, line_widths, marker_styles, marker_sizes
+PlotStyle.registerStyle('plasma-markers', plasmaMarkers)
+
 def generic_generator(name, color):
   def generic(plt, line_count):
     line_widths = [1] * line_count
