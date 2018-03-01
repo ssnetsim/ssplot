@@ -367,7 +367,10 @@ class MultilinePlot(object):
     yspan = ymax - ymin
 
     # figure out where markers should be placed (target 20 markers)
-    mark_every = math.ceil((int(xspan) / (self._xdata[1]-self._xdata[0])) / 20)
+    if len(self._xdata) > 1:
+      mark_every = math.ceil((int(xspan) / (self._xdata[1]-self._xdata[0])) / 20)
+    else:
+      mark_every = 1
 
     # plot the lines
     if len(self._xdata) > 0:
@@ -402,7 +405,7 @@ class MultilinePlot(object):
       ax.set_ylabel(self._ylabel)
 
     # create legend
-    if self._data_labels is not None:
+    if len(self._xdata) > 0 and self._data_labels is not None:
       ax.legend(
         loc=self._legend_location,
         ncol=self._legend_columns, title=self._legend_title,
