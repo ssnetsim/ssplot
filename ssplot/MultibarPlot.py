@@ -50,7 +50,8 @@ class MultibarPlot(object):
     self._num_bars = len(ydatas)
     assert self._num_bars > 0, 'each bar set must have at least one bar'
     for ydata in ydatas[1:]:
-      assert len(ydata) == self._num_sets
+      assert len(ydata) == self._num_sets, 'improper ydata length of {}'.format(
+        len(ydata))
 
     self._plt = plt
     self._xdata = xdata
@@ -276,9 +277,11 @@ class MultibarPlot(object):
     # determine base locations
     set_locs = numpy.arange(self._num_sets)
     if self._num_bars == 1 or self._num_sets == 1:
-      span = 1.0  # butted against each other
+      # butt bars against each other
+      span = 1.0
     else:
-      span = 0.75 # each bar set uses 75% of the space
+      # provide a spacing between sets
+      span = self._num_bars / (self._num_bars + 1)
     bar_width = span / self._num_bars
 
     # set bar set ticks and labels

@@ -39,6 +39,7 @@ from .SampleStats import SampleStats
 from .LoadLatencyStats import LoadLatencyStats
 from .LoadRateStats import LoadRateStats
 from .LoadHopsStats import LoadHopsStats
+from .SimLogStats import SimLogStats
 
 # utility classes
 from .PlotLineStyle import PlotLineStyle
@@ -65,3 +66,4 @@ from .LoadAverageHops import LoadAverageHops
 from .TimePercentMinimal import TimePercentMinimal
 from .TimeAverageHops import TimeAverageHops
 from .TimeLatency import TimeLatency
+from .SimTimeCompare import SimTimeCompare
