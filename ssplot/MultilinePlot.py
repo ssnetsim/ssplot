@@ -79,7 +79,8 @@ class MultilinePlot(object):
     self._yticklabels_verbose = False
 
   def set_plot_style(self, value):
-    assert value in ssplot.PlotLineStyle.styles()
+    assert value in ssplot.PlotLineStyle.styles(), \
+      'plot line style "{}" not found'.format(value)
     self._plot_style = value
 
   def set_figure_size(self, value):

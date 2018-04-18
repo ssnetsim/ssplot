@@ -96,7 +96,7 @@ def inferno(plt, bar_count):
   ecolors = colors
   hatches = [''] * bar_count
   return colors, edgecolors, ecolors, hatches
-PlotBarStyle.registerStyle('inferno', colorful, True)
+PlotBarStyle.registerStyle('inferno', inferno, True)
 
 def plasma(plt, bar_count):
   cmap = plt.get_cmap('plasma')
@@ -105,4 +105,4 @@ def plasma(plt, bar_count):
   ecolors = colors
   hatches = [''] * bar_count
   return colors, edgecolors, ecolors, hatches
-PlotBarStyle.registerStyle('inferno', colorful, True)
+PlotBarStyle.registerStyle('plasma', plasma, True)

@@ -76,7 +76,8 @@ class MultibarPlot(object):
     self._yticklabels_verbose = False
 
   def set_plot_style(self, value):
-    assert value in ssplot.PlotBarStyle.styles()
+    assert value in ssplot.PlotBarStyle.styles(), \
+      'plot bar style "{}" not found'.format(value)
     self._plot_style = value
 
   def set_figure_size(self, value):
