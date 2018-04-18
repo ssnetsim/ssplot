@@ -275,7 +275,7 @@ class LatencyPlot(object):
                   self._stats.p999, self._stats.p9999]
         labels = ['50th', '90th', '99th', '99.9th', '99.99th']
         color = 'black' if args.gray else 'red'
-        ps = ssplot.PlotStyle(color, self._plt, len(pstats))
+        ps = ssplot.PlotLineStyle(color, self._plt, len(pstats))
         lines = []
         for idx, perc in enumerate(pstats):
           lines.append(
@@ -354,7 +354,7 @@ class LatencyPlot(object):
                   self._stats.p999, self._stats.p9999]
         labels = ['50th', '90th', '99th', '99.9th', '99.99th']
         color = 'gray' if args.gray else 'red'
-        ps = ssplot.PlotStyle(color, self._plt, len(pstats))
+        ps = ssplot.PlotLineStyle(color, self._plt, len(pstats))
         lines = []
         for idx, perc in enumerate(pstats):
           lines.append(
@@ -437,7 +437,7 @@ class LatencyPlot(object):
         percents = [0.50, 0.90, 0.99, 0.999, 0.9999]
         labels = ['50th', '90th', '99th', '99.9th', '99.99th']
         color = 'gray' if args.gray else 'red'
-        ps = ssplot.PlotStyle(color, self._plt, len(pstats))
+        ps = ssplot.PlotLineStyle(color, self._plt, len(pstats))
         lines = []
         for idx, percentile in enumerate(pstats):
           # vertical line

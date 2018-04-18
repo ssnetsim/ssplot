@@ -41,11 +41,13 @@ from .LoadRateStats import LoadRateStats
 from .LoadHopsStats import LoadHopsStats
 
 # utility classes
-from .PlotStyle import PlotStyle
+from .PlotLineStyle import PlotLineStyle
+from .PlotBarStyle import PlotBarStyle
 from .GridStyle import GridStyle
 from .FigureSize import FigureSize
 from .LatencyPlot import LatencyPlot
 from .MultilinePlot import MultilinePlot
+from .MultibarPlot import MultibarPlot
 
 # these are the commandline interfaces
 from .CommandLine import CommandLine

@@ -31,35 +31,36 @@
 
 import numpy
 
-class PlotStyle(object):
+class PlotLineStyle(object):
   """
-  This is a plot style generator
+  This is a plot line style generator
   """
 
   __style_map = {}
   __default_style = None
 
   def __init__(self, style, plt, line_count):
-    assert style in PlotStyle.__style_map, \
-      '{} is not a registered plot style'.format(style)
-    self._all_styles = list(zip(*PlotStyle.__style_map[style](plt, line_count)))
+    assert style in PlotLineStyle.__style_map, \
+      '{} is not a registered plot line style'.format(style)
+    self._all_styles = list(zip(*PlotLineStyle.__style_map[style](
+      plt, line_count)))
     assert len(self._all_styles) == line_count, 'error in style implementation'
 
   @staticmethod
   def styles():
-    return list(PlotStyle.__style_map.keys())
+    return list(PlotLineStyle.__style_map.keys())
 
   @staticmethod
   def default():
-    return PlotStyle.__default_style
+    return PlotLineStyle.__default_style
 
   @staticmethod
   def registerStyle(style, func, default=False):
-    assert style not in PlotStyle.__style_map, \
+    assert style not in PlotLineStyle.__style_map, \
       '{} is already a registered plot style'.format(style)
-    PlotStyle.__style_map[style] = func
+    PlotLineStyle.__style_map[style] = func
     if default:
-      PlotStyle.__default_style = style
+      PlotLineStyle.__default_style = style
 
   def __getitem__(self, index):
     names = ['color', 'line_style', 'line_width', 'marker_style', 'marker_size']
@@ -78,7 +79,7 @@ def colorful(plt, line_count):
   marker_styles = ["None"] * line_count
   marker_sizes = [4] * line_count
   return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotStyle.registerStyle('colorful', colorful, True)
+PlotLineStyle.registerStyle('colorful', colorful, True)
 
 def colorfulDots(plt, line_count):
   line_widths = [1.5] * line_count
@@ -91,7 +92,7 @@ def colorfulDots(plt, line_count):
   marker_styles = ['o'] * line_count
   marker_sizes = [4] * line_count
   return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotStyle.registerStyle('colorful-dots', colorfulDots)
+PlotLineStyle.registerStyle('colorful-dots', colorfulDots)
 
 def inferno(plt, line_count):
   line_widths = [1.5] * line_count
@@ -101,7 +102,7 @@ def inferno(plt, line_count):
   marker_styles = ["None"] * line_count
   marker_sizes = [4] * line_count
   return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotStyle.registerStyle('inferno', inferno)
+PlotLineStyle.registerStyle('inferno', inferno)
 
 def infernoDots(plt, line_count):
   line_widths = [1.5] * line_count
@@ -111,7 +112,7 @@ def infernoDots(plt, line_count):
   marker_styles = ['o'] * line_count
   marker_sizes = [4] * line_count
   return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotStyle.registerStyle('inferno-dots', infernoDots)
+PlotLineStyle.registerStyle('inferno-dots', infernoDots)
 
 def infernoMarkers(plt, line_count):
   line_widths = [1] * line_count
@@ -125,7 +126,7 @@ def infernoMarkers(plt, line_count):
   line_styles = [s[1] for s in marker_line_styles]
   marker_sizes = [4] * line_count
   return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotStyle.registerStyle('inferno-markers', infernoMarkers)
+PlotLineStyle.registerStyle('inferno-markers', infernoMarkers)
 
 def plasma(plt, line_count):
   line_widths = [1.5] * line_count
@@ -135,7 +136,7 @@ def plasma(plt, line_count):
   marker_styles = ["None"] * line_count
   marker_sizes = [4] * line_count
   return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotStyle.registerStyle('plasma', plasma)
+PlotLineStyle.registerStyle('plasma', plasma)
 
 def plasmaDots(plt, line_count):
   line_widths = [1.5] * line_count
@@ -145,7 +146,7 @@ def plasmaDots(plt, line_count):
   marker_styles = ['o'] * line_count
   marker_sizes = [4] * line_count
   return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotStyle.registerStyle('plasma-dots', plasmaDots)
+PlotLineStyle.registerStyle('plasma-dots', plasmaDots)
 
 def plasmaMarkers(plt, line_count):
   line_widths = [1] * line_count
@@ -159,7 +160,7 @@ def plasmaMarkers(plt, line_count):
   line_styles = [s[1] for s in marker_line_styles]
   marker_sizes = [4] * line_count
   return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotStyle.registerStyle('plasma-markers', plasmaMarkers)
+PlotLineStyle.registerStyle('plasma-markers', plasmaMarkers)
 
 def generic_generator(name, color):
   def generic(plt, line_count):
@@ -175,4 +176,4 @@ def generic_generator(name, color):
     return colors, line_styles, line_widths, marker_styles, marker_sizes
   return generic
 for name, color in [('black', 'k'), ('red', 'r'),('gray', '0.5')]:
-  PlotStyle.registerStyle(name, generic_generator(name, color))
+  PlotLineStyle.registerStyle(name, generic_generator(name, color))
