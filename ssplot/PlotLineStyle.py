@@ -175,5 +175,5 @@ def generic_generator(name, color):
     marker_sizes = [5] * line_count
     return colors, line_styles, line_widths, marker_styles, marker_sizes
   return generic
-for name, color in [('black', 'k'), ('red', 'r'),('gray', '0.5')]:
+for name, color in [('black', 'k'), ('red', 'r'), ('gray', '0.5')]:
   PlotLineStyle.registerStyle(name, generic_generator(name, color))

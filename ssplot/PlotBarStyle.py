@@ -89,105 +89,20 @@ def black(plt, bar_count):
   return colors, edgecolors, ecolors, hatches[:bar_count]
 PlotBarStyle.registerStyle('black', black, False)
 
-"""
-
-Hatches:
-‘/’, ‘|’, ‘|’, ‘-‘, ‘+’, ‘x’, ‘o’, ‘O’, ‘.’, ‘*’
-
-def colorfulDots(plt, bar_count):
-  line_widths = [1.5] * bar_count
-  line_styles = ['solid'] * bar_count
-  if bar_count <= 3:
-    cmap = plt.get_cmap('brg')
-  else:
-    cmap = plt.get_cmap('gist_rainbow')
-  colors = [cmap(idx) for idx in numpy.linspace(0, 1, bar_count)]
-  marker_styles = ['o'] * bar_count
-  marker_sizes = [4] * bar_count
-  return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotBarStyle.registerStyle('colorful-dots', colorfulDots)
-
 def inferno(plt, bar_count):
-  line_widths = [1.5] * bar_count
-  line_styles = ['solid'] * bar_count
   cmap = plt.get_cmap('inferno')
   colors = [cmap(idx) for idx in numpy.linspace(0, 0.9, bar_count)]
-  marker_styles = ["None"] * bar_count
-  marker_sizes = [4] * bar_count
-  return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotBarStyle.registerStyle('inferno', inferno)
-
-def infernoDots(plt, bar_count):
-  line_widths = [1.5] * bar_count
-  line_styles = ['solid'] * bar_count
-  cmap = plt.get_cmap('inferno')
-  colors = [cmap(idx) for idx in numpy.linspace(0, 0.9, bar_count)]
-  marker_styles = ['o'] * bar_count
-  marker_sizes = [4] * bar_count
-  return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotBarStyle.registerStyle('inferno-dots', infernoDots)
-
-def infernoMarkers(plt, bar_count):
-  line_widths = [1] * bar_count
-  cmap = plt.get_cmap('inferno')
-  colors = [cmap(idx) for idx in numpy.linspace(0.0, 0.9, bar_count)]
-  line_styles = ['solid','dashed','dashdot','dotted']
-  marker_styles = ['s', '^', 'o', 'd', 'x', '|', 'None']
-  marker_line_styles = [(m, l) for l in line_styles for m in marker_styles]
-  assert len(marker_line_styles) > bar_count, 'Too many lines for plot style'
-  marker_styles = [s[0] for s in marker_line_styles]
-  line_styles = [s[1] for s in marker_line_styles]
-  marker_sizes = [4] * bar_count
-  return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotBarStyle.registerStyle('inferno-markers', infernoMarkers)
+  edgecolors = colors
+  ecolors = colors
+  hatches = [''] * bar_count
+  return colors, edgecolors, ecolors, hatches
+PlotBarStyle.registerStyle('inferno', colorful, True)
 
 def plasma(plt, bar_count):
-  line_widths = [1.5] * bar_count
-  line_styles = ['solid'] * bar_count
   cmap = plt.get_cmap('plasma')
   colors = [cmap(idx) for idx in numpy.linspace(0, 0.9, bar_count)]
-  marker_styles = ["None"] * bar_count
-  marker_sizes = [4] * bar_count
-  return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotBarStyle.registerStyle('plasma', plasma)
-
-def plasmaDots(plt, bar_count):
-  line_widths = [1.5] * bar_count
-  line_styles = ['solid'] * bar_count
-  cmap = plt.get_cmap('plasma')
-  colors = [cmap(idx) for idx in numpy.linspace(0, 0.9, bar_count)]
-  marker_styles = ['o'] * bar_count
-  marker_sizes = [4] * bar_count
-  return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotBarStyle.registerStyle('plasma-dots', plasmaDots)
-
-def plasmaMarkers(plt, bar_count):
-  line_widths = [1] * bar_count
-  cmap = plt.get_cmap('plasma')
-  colors = [cmap(idx) for idx in numpy.linspace(0.0, 0.9, bar_count)]
-  line_styles = ['solid','dashed','dashdot','dotted']
-  marker_styles = ['s', '^', 'o', 'd', 'x', '|', 'None']
-  marker_line_styles = [(m, l) for l in line_styles for m in marker_styles]
-  assert len(marker_line_styles) > bar_count, 'Too many lines for plot style'
-  marker_styles = [s[0] for s in marker_line_styles]
-  line_styles = [s[1] for s in marker_line_styles]
-  marker_sizes = [4] * bar_count
-  return colors, line_styles, line_widths, marker_styles, marker_sizes
-PlotBarStyle.registerStyle('plasma-markers', plasmaMarkers)
-
-def generic_generator(name, color):
-  def generic(plt, bar_count):
-    line_widths = [1] * bar_count
-    colors = [color] * bar_count
-    line_styles = ['solid', 'dashed','dashdot','dotted']
-    marker_styles = ['s', '^', 'o', 'd', 'x', '|', 'None']
-    marker_line_styles = [(m, l) for l in line_styles for m in marker_styles]
-    assert len(marker_line_styles) > bar_count, 'Too many lines for plot style'
-    line_styles = [s[1] for s in marker_line_styles]
-    marker_styles = [s[0] for s in marker_line_styles]
-    marker_sizes = [5] * bar_count
-    return colors, line_styles, line_widths, marker_styles, marker_sizes
-  return generic
-for name, color in [('black', 'k'), ('red', 'r'),('gray', '0.5')]:
-  PlotBarStyle.registerStyle(name, generic_generator(name, color))
-"""
+  edgecolors = colors
+  ecolors = colors
+  hatches = [''] * bar_count
+  return colors, edgecolors, ecolors, hatches
+PlotBarStyle.registerStyle('inferno', colorful, True)
