@@ -322,12 +322,24 @@ class MultibarPlot(object):
                 title=self._legend_title, fancybox=True, facecolor='white',
                 edgecolor='black', framealpha=1.0)
 
+    # determine if the bar labels can be int or need to be float
+    use_int = True
+    for bar_set in bar_sets:
+      for bar in bar_set:
+        if not bar.get_height().is_integer():
+          use_int = False
+          break
+
     # add value labels
     for bar_set in bar_sets:
       for bar in bar_set:
         height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height,
-                '{}'.format(int(height)), ha='center', va='bottom')
+        if use_int:
+          bar_label = '{}'.format(int(height))
+        else:
+          bar_label = '{:.2f}'.format(float(height))
+        ax.text(bar.get_x() + bar.get_width() / 2.0, height,
+                bar_label, ha='center', va='bottom')
 
     # set plot bounds
     ax.set_ylim(ymin, ymax)
