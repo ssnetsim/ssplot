@@ -59,6 +59,8 @@ class SimTimeCompare(ssplot.CommandLine):
                     help='size of each data set')
     sp.add_argument('num_data_sets', type=int,
                     help='number of data sets')
+    sp.add_argument('--scalar', type=float, default=1.0,
+                    help='scalar for each data point to be multiplied by')
     sp.add_argument('--data_mode', type=str,
                     default=SimTimeCompare.DATA_MODES[0],
                     choices=SimTimeCompare.DATA_MODES,
@@ -89,6 +91,9 @@ class SimTimeCompare(ssplot.CommandLine):
     for idx, log in enumerate(args.logs):
       # parse the data
       simtime = ssplot.SimLogStats(log).total_sim_units
+
+      # scale the data
+      simtime *= args.scalar
 
       # place the data
       block = idx // args.num_data_sets
