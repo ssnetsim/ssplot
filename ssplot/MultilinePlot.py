@@ -66,10 +66,10 @@ class MultilinePlot(object):
     self._xgrid = True
     self._ygrid = True
     self._grid_style = ssplot.GridStyle.default()
-    self._xmajor_ticks = 10
-    self._xminor_ticks = 20
-    self._ymajor_ticks = 10
-    self._yminor_ticks = 20
+    self._xmajor_ticks = None
+    self._xminor_ticks = None
+    self._ymajor_ticks = None
+    self._yminor_ticks = None
     self._legend_location = 'upper left'
     self._legend_columns = 1
     self._legend_title = None
@@ -426,32 +426,60 @@ class MultilinePlot(object):
     ax.set_axisbelow(True)
 
     # set axis scales
+    xlog = False
     if self._xscale is not None:
       if self._xscale is 'log':
+        xlog = True
         ax.set_xscale('log')
       elif self._xscale.startswith('log'):
+        xlog = True
         ax.set_xscale('log', basex=int(self._xscale[3:]))
       else:
         ax.set_xscale(self._xscale)
+    ylog = False
     if self._yscale is not None:
       if self._yscale is 'log':
+        ylog = True
         ax.set_yscale('log')
       elif self._yscale.startswith('log'):
+        ylog = True
         ax.set_yscale('log', basey=int(self._yscale[3:]))
       else:
         ax.set_yscale(self._yscale)
 
-    # ticks
+    # default ticks
+    if self._xmajor_ticks is None and not xlog:
+      self._xmajor_ticks = 10
+    if self._xminor_ticks is None and not xlog:
+      self._xminor_ticks = 20
+    if self._ymajor_ticks is None and not ylog:
+      self._ymajor_ticks = 10
+    if self._yminor_ticks is None and not ylog:
+      self._yminor_ticks = 20
+
+    # set ticks
     if self._xmajor_ticks is not None:
+      if xlog:
+        raise ValueError('you can\'t set xmajor ticks with a logarithmic '
+                         'x-axis')
       ax.xaxis.set_major_locator(
         matplotlib.ticker.MaxNLocator(self._xmajor_ticks))
     if self._xminor_ticks is not None:
+      if xlog:
+        raise ValueError('you can\'t set xminor ticks with a logarithmic '
+                         'x-axis')
       ax.xaxis.set_minor_locator(
         matplotlib.ticker.MaxNLocator(self._xminor_ticks))
     if self._ymajor_ticks is not None:
+      if ylog:
+        raise ValueError('you can\'t set ymajor ticks with a logarithmic '
+                         'y-axis')
       ax.yaxis.set_major_locator(
         matplotlib.ticker.MaxNLocator(self._ymajor_ticks))
     if self._yminor_ticks is not None:
+      if ylog:
+        raise ValueError('you can\'t set yminor ticks with a logarithmic '
+                         'y-axis')
       ax.yaxis.set_minor_locator(
         matplotlib.ticker.MaxNLocator(self._yminor_ticks))
 
