@@ -68,8 +68,8 @@ class MultibarPlot(object):
     self._yauto_frame = 0.0
     self._ygrid = True
     self._grid_style = ssplot.GridStyle.default()
-    self._ymajor_ticks = 10
-    self._yminor_ticks = 20
+    self._ymajor_ticks = None
+    self._yminor_ticks = None
     self._legend_location = 'upper left'
     self._legend_columns = 1
     self._legend_title = None
@@ -351,19 +351,34 @@ class MultibarPlot(object):
     ax.set_axisbelow(True)
 
     # set axis scales
+    ylog = False
     if self._yscale is not None:
       if self._yscale is 'log':
+        ylog = True
         ax.set_yscale('log')
       elif self._yscale.startswith('log'):
+        ylog = True
         ax.set_yscale('log', basey=int(self._yscale[3:]))
       else:
         ax.set_yscale(self._yscale)
 
-    # ticks
+    # default ticks
+    if self._ymajor_ticks is None and not ylog:
+      self._ymajor_ticks = 10
+    if self._yminor_ticks is None and not ylog:
+      self._yminor_ticks = 20
+
+    # set ticks
     if self._ymajor_ticks is not None:
+      if ylog:
+        raise ValueError('you can\'t set ymajor ticks with a logarithmic '
+                         'y-axis')
       ax.yaxis.set_major_locator(
         matplotlib.ticker.MaxNLocator(self._ymajor_ticks))
     if self._yminor_ticks is not None:
+      if ylog:
+        raise ValueError('you can\'t set yminor ticks with a logarithmic '
+                         'y-axis')
       ax.yaxis.set_minor_locator(
         matplotlib.ticker.MaxNLocator(self._yminor_ticks))
 
