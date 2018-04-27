@@ -419,10 +419,14 @@ class MultilinePlot(object):
 
     # grid
     grid_kwargs = ssplot.GridStyle.style(self._grid_style)
-    if self._xgrid is not None:
+    if self._xgrid:
       ax.xaxis.grid(True, **grid_kwargs)
-    if self._ygrid is not None:
+    else:
+      ax.xaxis.grid(False, **grid_kwargs)
+    if self._ygrid:
       ax.yaxis.grid(True, **grid_kwargs)
+    else:
+      ax.yaxis.grid(False, **grid_kwargs)
     ax.set_axisbelow(True)
 
     # set axis scales

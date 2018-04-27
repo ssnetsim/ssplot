@@ -63,6 +63,7 @@ class MultibarPlot(object):
     self._xlabel = None
     self._ylabel = None
     self._data_labels = None
+    self._label_bars = True
     self._ymin = None
     self._ymax = None
     self._yauto_frame = 0.0
@@ -96,6 +97,9 @@ class MultibarPlot(object):
   def set_data_labels(self, value):
     assert len(value) == self._num_bars
     self._data_labels = value
+
+  def set_label_bars(self, value):
+    self._label_bars = bool(value)
 
   def set_ymin(self, value):
     self._ymin = value
@@ -173,6 +177,9 @@ class MultibarPlot(object):
     if 'data_labels' not in skip:
       parser.add_argument('--data_labels', type=str, action='append',
                           help='the label of the data (give all or no labels)')
+    if 'label_bars' not in skip:
+      parser.add_argument('--label_bars', type=ssplot.str_to_bool,
+                          help='whether or not to label bars')
     if 'ymin' not in skip:
       parser.add_argument('--ymin', type=float, default=None,
                           help='the minimum value of the y-axis')
@@ -227,6 +234,8 @@ class MultibarPlot(object):
       self.set_ylabel(args.ylabel)
     if 'data_labels' not in skip and args.data_labels is not None:
       self.set_data_labels(args.data_labels)
+    if 'label_bars' not in skip and args.label_bars is not None:
+      self.set_label_bars(args.label_bars)
     if 'ymin' not in skip and args.ymin is not None:
       self.set_ymin(args.ymin)
     if 'ymax' not in skip and args.ymax is not None:
@@ -331,23 +340,26 @@ class MultibarPlot(object):
           break
 
     # add value labels
-    for bar_set in bar_sets:
-      for bar in bar_set:
-        height = bar.get_height()
-        if use_int:
-          bar_label = '{}'.format(int(height))
-        else:
-          bar_label = '{:.2f}'.format(float(height))
-        ax.text(bar.get_x() + bar.get_width() / 2.0, height,
-                bar_label, ha='center', va='bottom')
+    if self._label_bars:
+      for bar_set in bar_sets:
+        for bar in bar_set:
+          height = bar.get_height()
+          if use_int:
+            bar_label = '{}'.format(int(height))
+          else:
+            bar_label = '{:.2f}'.format(float(height))
+          ax.text(bar.get_x() + bar.get_width() / 2.0, height,
+                  bar_label, ha='center', va='bottom')
 
     # set plot bounds
     ax.set_ylim(ymin, ymax)
 
     # grid
     grid_kwargs = ssplot.GridStyle.style(self._grid_style)
-    if self._ygrid is not None:
+    if self._ygrid:
       ax.yaxis.grid(True, **grid_kwargs)
+    else:
+      ax.yaxis.grid(False)
     ax.set_axisbelow(True)
 
     # set axis scales
