@@ -73,7 +73,10 @@ class SampleStats(object):
         assert self.smin >= 0, 'samples can not be negative'
 
       # compute the probability density function
-      hist, self.pdfx = numpy.histogram(self.samples, density=True, bins='auto')
+      try:
+        hist, self.pdfx = numpy.histogram(self.samples, density=True, bins='auto')
+      except:
+        hist, self.pdfx = numpy.histogram(self.samples, density=True)
       self.pdfy = hist.astype(float) / hist.sum()
 
       # compute the cumulative distribution function
