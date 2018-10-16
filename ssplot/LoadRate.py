@@ -60,6 +60,8 @@ class LoadRate(ssplot.CommandLine):
                     help='load step size')
     sp.add_argument('stats', metavar='F', type=str, nargs='+',
                     help='stats file to parse')
+    sp.add_argument('--ignore_zeros', type=ssplot.str_to_bool, default=False,
+                    help='ignore zeros in calculations')
 
     ssplot.MultilinePlot.add_args(sp, *LoadRate._SKIP)
 
@@ -74,7 +76,7 @@ class LoadRate(ssplot.CommandLine):
 
     # create the LoadRate stats object
     lrstats = ssplot.LoadRateStats(
-      args.start, args.stop, args.step, stats)
+      args.start, args.stop, args.step, stats, args.ignore_zeros)
 
     # determine fields to plot
     fields = ssplot.LoadRateStats.FIELDS

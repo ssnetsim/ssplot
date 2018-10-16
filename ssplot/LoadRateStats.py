@@ -30,6 +30,7 @@
 """
 
 import gridstats
+import math
 import numpy
 
 class LoadRateStats(object):
@@ -40,7 +41,7 @@ class LoadRateStats(object):
 
   FIELDS = ['Minimum', 'Mean', 'Maximum']
 
-  def __init__(self, start, stop, step, grids):
+  def __init__(self, start, stop, step, grids, ignore_zeros=False):
     # check that all the grids are the same size
     for idx, grid in enumerate(grids[1:]):
       assert len(grid.column_names()) == len(grids[0].column_names()), (
@@ -67,12 +68,17 @@ class LoadRateStats(object):
       assert isinstance(grid, gridstats.GridStats), 'grids must be GridStats'
       # extract delivered
       delivered = []
+      count = 0
       for term in range(0, len(grid.row_names()) - 1):
-        delivered.append(grid.get(term, 'delivered') * 100)
+        value = grid.get(term, 'delivered') * 100
+        if value > 0.0 or math.isnan(value) or not ignore_zeros:
+          delivered.append(value)
+          count += 1
+
 
       # compute stats
       minEj = min(delivered)
-      meanEj = sum(delivered) / len(delivered)
+      meanEj = sum(delivered) / count
       maxEj = max(delivered)
 
       # prepare data
