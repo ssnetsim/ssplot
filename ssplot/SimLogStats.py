@@ -75,9 +75,18 @@ class SimLogStats(object):
             self.sim_units_per_real_second = float(line[line.find(':')+1:].strip())
 
     # check that we got everything we expect
-    assert self.total_event_count != None
-    assert self.total_sim_units != None
-    assert self.total_real_seconds != None
-    assert self.events_per_real_second != None
-    assert self.events_per_sim_unit != None
-    assert self.sim_units_per_real_second != None
+    def error_text(message):
+      return message + ' in file ' + filename
+
+    assert self.total_event_count != None, error_text(
+      'missing total event count')
+    assert self.total_sim_units != None, error_text(
+      'missing total sim units')
+    assert self.total_real_seconds != None, error_text(
+      'missing total real seconds')
+    assert self.events_per_real_second != None, error_text(
+      'missing events per real second')
+    assert self.events_per_sim_unit != None, error_text(
+      'missing events per sim unit')
+    assert self.sim_units_per_real_second != None, error_text(
+      'missing sim units per real second')
