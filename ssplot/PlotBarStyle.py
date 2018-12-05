@@ -96,7 +96,19 @@ def inferno(plt, bar_count):
   ecolors = colors
   hatches = [''] * bar_count
   return colors, edgecolors, ecolors, hatches
-PlotBarStyle.registerStyle('inferno', inferno, True)
+PlotBarStyle.registerStyle('inferno', inferno, False)
+
+def inferno2(plt, bar_count):
+  assert bar_count <= 2
+  cmap = plt.get_cmap('inferno')
+  colors = [cmap(idx) for idx in numpy.linspace(0, 1.0, 6)]
+  colors = [colors[1], colors[-2]]
+  colors = colors[0:bar_count]
+  edgecolors = colors
+  ecolors = colors
+  hatches = [''] * bar_count
+  return colors, edgecolors, ecolors, hatches
+PlotBarStyle.registerStyle('inferno2', inferno2, False)
 
 def plasma(plt, bar_count):
   cmap = plt.get_cmap('plasma')
@@ -105,4 +117,4 @@ def plasma(plt, bar_count):
   ecolors = colors
   hatches = [''] * bar_count
   return colors, edgecolors, ecolors, hatches
-PlotBarStyle.registerStyle('plasma', plasma, True)
+PlotBarStyle.registerStyle('plasma', plasma, False)
