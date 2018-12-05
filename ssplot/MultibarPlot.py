@@ -64,6 +64,7 @@ class MultibarPlot(object):
     self._ylabel = None
     self._data_labels = None
     self._label_bars = True
+    self._bar_label_precision = 2
     self._ymin = None
     self._ymax = None
     self._yauto_frame = 0.0
@@ -100,6 +101,10 @@ class MultibarPlot(object):
 
   def set_label_bars(self, value):
     self._label_bars = bool(value)
+
+  def set_bar_label_precision(self, value):
+    assert value >= 0, 'bar label precision must be >= 0'
+    self._bar_label_precision = value
 
   def set_ymin(self, value):
     self._ymin = value
@@ -180,6 +185,9 @@ class MultibarPlot(object):
     if 'label_bars' not in skip:
       parser.add_argument('--label_bars', type=ssplot.str_to_bool,
                           help='whether or not to label bars')
+    if 'bar_label_precision' not in skip:
+      parser.add_argument('--bar_label_precision', type=int,
+                          help='set bar label precision')
     if 'ymin' not in skip:
       parser.add_argument('--ymin', type=float, default=None,
                           help='the minimum value of the y-axis')
@@ -236,6 +244,9 @@ class MultibarPlot(object):
       self.set_data_labels(args.data_labels)
     if 'label_bars' not in skip and args.label_bars is not None:
       self.set_label_bars(args.label_bars)
+    if ('bar_label_precision' not in skip and
+        args.bar_label_precision is not None):
+      self.set_bar_label_precision(args.bar_label_precision)
     if 'ymin' not in skip and args.ymin is not None:
       self.set_ymin(args.ymin)
     if 'ymax' not in skip and args.ymax is not None:
@@ -347,7 +358,8 @@ class MultibarPlot(object):
           if use_int:
             bar_label = '{}'.format(int(height))
           else:
-            bar_label = '{:.2f}'.format(float(height))
+            fmt = '{{:.{}f}}'.format(self._bar_label_precision)
+            bar_label = fmt.format(float(height))
           ax.text(bar.get_x() + bar.get_width() / 2.0, height,
                   bar_label, ha='center', va='bottom')
 
@@ -410,10 +422,13 @@ MultibarPlot._kwargs = {
   'xlabel': MultibarPlot.set_xlabel,
   'ylabel': MultibarPlot.set_ylabel,
   'data_labels': MultibarPlot.set_data_labels,
+  'label_bars': MultibarPlot.set_label_bars,
+  'bar_label_precision': MultibarPlot.set_bar_label_precision,
   'ymin': MultibarPlot.set_ymin,
   'ymax': MultibarPlot.set_ymax,
   'yauto_frame': MultibarPlot.set_yauto_frame,
   'ygrid': MultibarPlot.set_ygrid,
+  'grid_style': MultibarPlot.set_grid_style,
   'ymajor_ticks': MultibarPlot.set_ymajor_ticks,
   'yminor_ticks': MultibarPlot.set_yminor_ticks,
   'legend_location': MultibarPlot.set_legend_location,
