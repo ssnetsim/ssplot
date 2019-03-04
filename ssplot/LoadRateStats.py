@@ -45,7 +45,11 @@ class LoadRateStats(object):
     # check that all the grids are the same size
     for idx, grid in enumerate(grids[1:]):
       assert len(grid.column_names()) == len(grids[0].column_names()), (
-        "grid {0} and {1} don't have the same #cols".format(0, idx+1))
+          ("grid {0} and {1} don't have the same number of columns\n"
+           "grid {0} is {2} with {3} columns\n"
+           "grid {1} is {4} with {5} columns")
+           .format(0, idx+1, grids[0].source, len(grids[0].column_names()),
+                   grid.source, len(grid.column_names())))
       assert len(grid.row_names()) == len(grids[0].row_names()), (
         "grid {0} and {1} don't have the same #rows".format(0, idx+1))
 
