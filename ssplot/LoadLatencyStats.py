@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-import gridstats
+import simplecsv
 import numpy
 
 class LoadLatencyStats(object):
@@ -59,7 +59,7 @@ class LoadLatencyStats(object):
 
     # load data arrays
     for idx, grid in enumerate(grids):
-      assert isinstance(grid, gridstats.GridStats), 'grids must be GridStats'
+      assert isinstance(grid, simplecsv.GridStats), 'grids must be GridStats'
       for key in self.data.keys():
         if key != 'Load':
           self.data[key][idx] = grid.get(row, key)

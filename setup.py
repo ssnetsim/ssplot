@@ -62,5 +62,5 @@ setup(
   packages=['ssplot'],
   scripts=['bin/ssplot'],
   install_requires=['percentile >= 1.0.2',
-                    'gridstats >= 1.0.0'],
+                    'simplecsv >= 2.0.0'],
 )

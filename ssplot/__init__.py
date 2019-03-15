@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 from .utils import *
 from .consts import *
@@ -39,7 +39,6 @@ from .SampleStats import SampleStats
 from .LoadLatencyStats import LoadLatencyStats
 from .LoadRateStats import LoadRateStats
 from .LoadHopsStats import LoadHopsStats
-from .SimLogStats import SimLogStats
 
 # utility classes
 from .PlotLineStyle import PlotLineStyle

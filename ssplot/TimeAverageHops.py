@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-import gridstats
+import simplecsv
 import numpy
 
 import ssplot
@@ -63,7 +63,7 @@ class TimeAverageHops(ssplot.CommandLine):
   @staticmethod
   def run_command(args, plt):
     # create a sample stats object of latencies
-    stats = gridstats.GridStats()
+    stats = simplecsv.GridStats()
     stats.read(args.ifile)
 
     # determine the fields and data labels to plot

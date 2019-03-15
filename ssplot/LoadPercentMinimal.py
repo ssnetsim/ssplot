@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-import gridstats
+import simplecsv
 import numpy
 
 import ssplot
@@ -69,7 +69,7 @@ class LoadPercentMinimal(ssplot.CommandLine):
     # read in all stats
     stats = []
     for stat in args.stats:
-      gs = gridstats.GridStats()
+      gs = simplecsv.GridStats()
       gs.read(stat)
       stats.append(gs)
 

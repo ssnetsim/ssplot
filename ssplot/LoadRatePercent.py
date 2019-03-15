@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-import gridstats
+import simplecsv
 import numpy
 
 import ssplot
@@ -72,7 +72,7 @@ class LoadRatePercent(ssplot.CommandLine):
     # read in all rate stats
     rate_stats = []
     for stat in args.rate_stats:
-      gs = gridstats.GridStats()
+      gs = simplecsv.GridStats()
       gs.read(stat)
       rate_stats.append(gs)
 
@@ -83,7 +83,7 @@ class LoadRatePercent(ssplot.CommandLine):
     # read in all hops stats
     hops_stats = []
     for stat in args.hops_stats:
-      gs = gridstats.GridStats()
+      gs = simplecsv.GridStats()
       gs.read(stat)
       hops_stats.append(gs)
 

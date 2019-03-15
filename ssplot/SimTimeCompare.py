@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-import gridstats
 import numpy
+import simplecsv
 
 import ssplot
 
@@ -67,16 +67,16 @@ class SimTimeCompare(ssplot.CommandLine):
                     help='set the mode for data manipulation')
     sp.add_argument('--data_set_labels', type=str, action='append',
                     help='labels for the data sets')
-    sp.add_argument('logs', metavar='F', type=str, nargs='+',
-                    help='simulation logs to parse')
+    sp.add_argument('stats', metavar='F', type=str, nargs='+',
+                    help='simulation info stats to parse')
 
     ssplot.MultibarPlot.add_args(sp, *SimTimeCompare._SKIP)
 
   @staticmethod
   def run_command(args, plt):
     # check inputs
-    if len(args.logs) != (args.data_set_size * args.num_data_sets):
-      print('invalid number of logs, expected {}'.format(
+    if len(args.stats) != (args.data_set_size * args.num_data_sets):
+      print('invalid number of stats, expected {}'.format(
         args.data_set_size * args.num_data_sets))
       return -1
     if (args.data_set_labels is not None and
@@ -88,9 +88,11 @@ class SimTimeCompare(ssplot.CommandLine):
     # read in all stats
     ydatas = [[float('NaN')] * args.num_data_sets
               for x in range(args.data_set_size)]
-    for idx, log in enumerate(args.logs):
+    for idx, stat in enumerate(args.stats):
       # parse the data
-      simtime = ssplot.SimLogStats(log).total_sim_units
+      cstats = simplecsv.ColumnStats()
+      cstats.read(stat)
+      simtime = cstats.get('Total sim units')
 
       # scale the data
       simtime *= args.scalar
