@@ -30,6 +30,7 @@
 """
 import matplotlib.ticker
 import math
+import numbers
 import ssplot
 
 class MultilinePlot(object):
@@ -45,6 +46,26 @@ class MultilinePlot(object):
     """
     for ydata in ydatas:
       assert len(xdata) == len(ydata)
+
+    self._x_min_val = None
+    self._x_max_val = None
+    for xval in xdata:
+      if isinstance(xval, numbers.Number):
+        assert not math.isnan(xval), 'xdata can not contain NaN'
+      if self._x_min_val is None or xval < self._x_min_val:
+        self._x_min_val = xval
+      if self._x_max_val is None or xval > self._x_max_val:
+        self._x_max_val = xval
+
+    self._y_min_val = None
+    self._y_max_val = None
+    for ydata in ydatas:
+      for yval in ydata:
+        if not math.isnan(yval):
+          if self._y_min_val is None or yval < self._y_min_val:
+            self._y_min_val = yval
+          if self._y_max_val is None or yval > self._y_max_val:
+            self._y_max_val = yval
 
     self._plt = plt
     self._xdata = xdata
@@ -343,20 +364,24 @@ class MultilinePlot(object):
       xmax = self._xmax
       ymin = self._ymin
       ymax = self._ymax
-
       if xmin == None:
-        xmin = min(self._xdata)
+        xmin = self._x_min_val
       if xmax == None:
-        xmax = max(self._xdata)
+        xmax = self._x_max_val
       if ymin == None:
-        ymin = min(map(min, self._ydatas))
+        ymin = self._y_min_val #min(map(min, self._ydatas))
       if ymax == None:
-        ymax = max(map(max, self._ydatas))
+        ymax = self._y_max_val #max(map(max, self._ydatas))
     else :
       xmin = 0
       xmax = 1
       ymin = 0
       ymax = 1
+
+    for limit in [xmin, xmax, ymin, ymax]:
+      assert limit is not None
+      if isinstance(limit, numbers.Number):
+        assert not math.isnan(limit)
 
     xspan = xmax - xmin
     yspan = ymax - ymin
@@ -368,8 +393,9 @@ class MultilinePlot(object):
     yspan = ymax - ymin
 
     # figure out where markers should be placed (target 20 markers)
-    if len(self._xdata) > 1:
-      mark_every = math.ceil((int(xspan) / (self._xdata[1]-self._xdata[0])) / 20)
+    if len(self._xdata) > 1 and isinstance(xspan, numbers.Number):
+      mark_every = math.ceil(
+        (int(xspan) / (self._xdata[1] - self._xdata[0])) / 20)
     else:
       mark_every = 1
 
