@@ -46,6 +46,9 @@ class MultilinePlot(object):
     """
     for ydata in ydatas:
       assert len(xdata) == len(ydata)
+    print(xdata)
+    for ydata in ydatas:
+      print(ydata)
 
     self._x_min_val = None
     self._x_max_val = None
@@ -56,6 +59,10 @@ class MultilinePlot(object):
         self._x_min_val = xval
       if self._x_max_val is None or xval > self._x_max_val:
         self._x_max_val = xval
+    if self._x_min_val == None:
+      self._x_min_val = 0
+    if self._x_max_val == None:
+      self._x_max_val = 1
 
     self._y_min_val = None
     self._y_max_val = None
@@ -66,6 +73,10 @@ class MultilinePlot(object):
             self._y_min_val = yval
           if self._y_max_val is None or yval > self._y_max_val:
             self._y_max_val = yval
+    if self._y_min_val == None:
+      self._y_min_val = 0
+    if self._y_max_val == None:
+      self._y_max_val = 1
 
     self._plt = plt
     self._xdata = xdata
