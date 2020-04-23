@@ -65,8 +65,10 @@ class LoadLatencyCompare(ssplot.CommandLine):
 
     sp.add_argument('--field', default='Mean',
                     help='the field to be plotted')
-    sp.add_argument('--units', default=None,
+    sp.add_argument('--latency_units', default=None,
                     help='latency units')
+    sp.add_argument('--load_units', type=str, default='%',
+                    help='load units')
     sp.add_argument('--row', default='Packet',
                     choices=['Packet', 'Message', 'Transaction'],
                     help='chooses whether to analyze packets, messages, or'
@@ -77,6 +79,8 @@ class LoadLatencyCompare(ssplot.CommandLine):
   @staticmethod
   def run_command(args, plt):
     # check inputs
+    assert args.start <= args.stop, 'start must be <= stop'
+    assert args.step > 0, 'step must be > 0.0'
     gridsPerSet = len(numpy.arange(args.start, args.stop, args.step))
     if len(args.stats) % gridsPerSet != 0:
       print(('The number of stats file for data set is {0},\n'
@@ -114,10 +118,10 @@ class LoadLatencyCompare(ssplot.CommandLine):
       ydatas.append(stat.data[args.field])
 
     # create x and y labels
-    xlabel = 'Load (%)'
+    xlabel = 'Load ({0})'.format(args.load_units)
     ylabel = '{0} Latency'.format(args.field)
-    if args.units:
-      ylabel += ' ({0})'.format(args.units)
+    if args.latency_units:
+      ylabel += ' ({0})'.format(args.latency_units)
 
     # plot
     mlp = ssplot.MultilinePlot(plt, xdata, ydatas)

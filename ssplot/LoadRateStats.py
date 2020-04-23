@@ -59,6 +59,8 @@ class LoadRateStats(object):
     self.step = step
 
     # create arrays
+    assert start <= stop, 'start must be <= stop'
+    assert step > 0, 'step must be > 0.0'
     injected = numpy.arange(start, stop, step)
     self.data = {'Injected': injected}
     for field in LoadRateStats.FIELDS:

@@ -55,7 +55,7 @@ class TimeLatency(ssplot.CommandLine):
     sp.add_argument('plotfile',
                     help='output plot file')
 
-    sp.add_argument('--units',
+    sp.add_argument('--latency_units', default=None,
                     help='latency units')
     sp.add_argument('--minimum', type=ssplot.str_to_bool, default='y',
                     help='whether or not to plot minimum latency')
@@ -83,8 +83,8 @@ class TimeLatency(ssplot.CommandLine):
     # create x and y axis labels
     xlabel = 'Time'
     ylabel = 'Latency'
-    if args.units:
-      ylabel += ' ({0})'.format(args.units)
+    if args.latency_units:
+      ylabel += ' ({0})'.format(args.latency_units)
 
     # plot
     mlp = ssplot.MultilinePlot(plt, xdata, ydatas)

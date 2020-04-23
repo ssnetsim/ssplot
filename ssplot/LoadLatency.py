@@ -61,8 +61,10 @@ class LoadLatency(ssplot.CommandLine):
     sp.add_argument('stats', metavar='F', type=str, nargs='+',
                     help='stats file to parse')
 
-    sp.add_argument('--units',
+    sp.add_argument('--latency_units', type=str, default=None,
                     help='latency units')
+    sp.add_argument('--load_units', type=str, default='%',
+                    help='load units')
     sp.add_argument('--minimum', type=ssplot.str_to_bool, default='y',
                     help='whether or not to plot minimum latency')
     sp.add_argument('--row', default='Packet',
@@ -98,10 +100,10 @@ class LoadLatency(ssplot.CommandLine):
       ydatas.append(llstats.data[field])
 
     # create x and y axis labels
-    xlabel = 'Load (%)'
+    xlabel = 'Load ({})'.format(args.load_units)
     ylabel = 'Latency'
-    if args.units:
-      ylabel += ' ({0})'.format(args.units)
+    if args.latency_units:
+      ylabel += ' ({0})'.format(args.latency_units)
 
     # plot
     mlp = ssplot.MultilinePlot(plt, xdata, ydatas)
