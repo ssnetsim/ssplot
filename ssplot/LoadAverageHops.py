@@ -62,6 +62,8 @@ class LoadAverageHops(ssplot.CommandLine):
     sp.add_argument('stats', metavar='F', type=str, nargs='+',
                     help='stats file to parse')
 
+    sp.add_argument('--load_units', type=str, default='%',
+                    help='load units')
     sp.add_argument('--non_minimal', type=ssplot.str_to_bool, default='y',
                     help='whether or not to plot non-minimal hops')
 
@@ -94,7 +96,7 @@ class LoadAverageHops(ssplot.CommandLine):
       ydatas.append(lhstats.data[field])
 
     # create x and y axis labels
-    xlabel = 'Load (%)'
+    xlabel = 'Load ({0})'.format(args.load_units)
     ylabel = 'Average Hops'
 
     # plot

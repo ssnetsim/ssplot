@@ -48,6 +48,8 @@ class LoadLatencyStats(object):
     self.step = step
 
     # create arrays
+    assert start <= stop, 'start must be <= stop'
+    assert step > 0, 'step must be > 0.0'
     load = numpy.arange(start, stop, step)
     self.data = {'Load': load}
     for field in LoadLatencyStats.FIELDS:

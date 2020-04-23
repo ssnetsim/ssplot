@@ -60,10 +60,13 @@ class LoadRatePercent(ssplot.CommandLine):
                     help='stopping load value (exclusive)')
     sp.add_argument('step', type=float,
                     help='load step size')
+
     sp.add_argument('--rate_stats', metavar='F', type=str, nargs='+',
                     help='rate stats file to parse')
     sp.add_argument('--hops_stats', metavar='F', type=str, nargs='+',
                     help='hops stats file to parse')
+    sp.add_argument('--load_units', type=str, default='%',
+                    help='load units')
 
     ssplot.MultilinePlot.add_args(sp, *LoadRatePercent._SKIP)
 
@@ -106,8 +109,8 @@ class LoadRatePercent(ssplot.CommandLine):
     ydatas.append(numpy.multiply(mean_rate, nmin_percent))
 
     # create x and y axis labels
-    xlabel = 'Injected Rate (%)'
-    ylabel = 'Delivered Rate (%)'
+    xlabel = 'Injected Rate ({0})'.format(args.load_units)
+    ylabel = 'Delivered Rate ({0})'.format(args.load_units)
 
     # plot
     mlp = ssplot.MultilinePlot(plt, xdata, ydatas)

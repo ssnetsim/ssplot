@@ -60,6 +60,8 @@ class LoadRate(ssplot.CommandLine):
                     help='load step size')
     sp.add_argument('stats', metavar='F', type=str, nargs='+',
                     help='stats file to parse')
+    sp.add_argument('--load_units', type=str, default='%',
+                    help='load units')
     sp.add_argument('--ignore_zeros', type=ssplot.str_to_bool, default=False,
                     help='ignore zeros in calculations')
 
@@ -88,8 +90,8 @@ class LoadRate(ssplot.CommandLine):
       ydatas.append(lrstats.data[field])
 
     # create x and y axis labels
-    xlabel = 'Injected Rate (%)'
-    ylabel = 'Delivered Rate (%)'
+    xlabel = 'Injected Rate ({0})'.format(args.load_units)
+    ylabel = 'Delivered Rate ({0})'.format(args.load_units)
 
     # plot
     mlp = ssplot.MultilinePlot(plt, xdata, ydatas)

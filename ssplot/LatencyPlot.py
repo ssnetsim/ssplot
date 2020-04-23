@@ -53,7 +53,7 @@ class LatencyPlot(object):
     parser.add_argument('--title', type=str,
                         default=None,
                         help='the title of the plot')
-    parser.add_argument('--units', type=str,
+    parser.add_argument('--latency_units', type=str,
                         default=None,
                         help='the units of latency samples')
     parser.add_argument('--figure_size',
@@ -220,9 +220,9 @@ class LatencyPlot(object):
     # format axes
     if args.title:
       axes.set_title(args.title, fontsize=ssplot.PLOT_TITLE_FONTSIZE)
-    if args.units:
-      axes.set_xlabel('Time ({0})'.format(args.units))
-      axes.set_ylabel('Latency ({0})'.format(args.units))
+    if args.latency_units:
+      axes.set_xlabel('Time ({0})'.format(args.latency_units))
+      axes.set_ylabel('Latency ({0})'.format(args.latency_units))
     else:
       axes.set_xlabel('Time')
       axes.set_ylabel('Latency')
@@ -289,7 +289,7 @@ class LatencyPlot(object):
 
         # legend
         if args.show_legend:
-          unitstr = ' ' + args.units if args.units else ''
+          unitstr = ' ' + args.latency_units if args.latency_units else ''
           for idx in range(len(labels)):
             labels[idx] += ' ({0:.3f}{1})'.format(pstats[idx], unitstr)
           axes.legend(lines, labels,
@@ -306,8 +306,8 @@ class LatencyPlot(object):
     # format axes
     if args.title:
       axes.set_title(args.title, fontsize=ssplot.PLOT_TITLE_FONTSIZE)
-    if args.units:
-      axes.set_xlabel('Latency ({0})'.format(args.units))
+    if args.latency_units:
+      axes.set_xlabel('Latency ({0})'.format(args.latency_units))
     else:
       axes.set_xlabel('Latency')
     axes.set_ylabel('Probability')
@@ -368,7 +368,7 @@ class LatencyPlot(object):
 
         # legend
         if args.show_legend:
-          unitstr = ' ' + args.units if args.units else ''
+          unitstr = ' ' + args.latency_units if args.latency_units else ''
           for idx in range(len(labels)):
             labels[idx] += ' ({0:.3f}{1})'.format(pstats[idx], unitstr)
           axes.legend(lines, labels,
@@ -388,8 +388,8 @@ class LatencyPlot(object):
     # format axes
     if args.title:
       axes.set_title(args.title, fontsize=ssplot.PLOT_TITLE_FONTSIZE)
-    if args.units:
-      axes.set_xlabel('Latency ({0})'.format(args.units))
+    if args.latency_units:
+      axes.set_xlabel('Latency ({0})'.format(args.latency_units))
     else:
       axes.set_xlabel('Latency')
     axes.set_ylabel('Probability')
@@ -453,7 +453,7 @@ class LatencyPlot(object):
 
         # legend
         if args.show_legend:
-          unitstr = ' ' + args.units if args.units else ''
+          unitstr = ' ' + args.latency_units if args.latency_units else ''
           for idx in range(len(labels)):
             labels[idx] += ' ({0:.3f}{1})'.format(pstats[idx], unitstr)
           axes.legend(lines, labels,
@@ -473,8 +473,8 @@ class LatencyPlot(object):
     # format axes
     if args.title:
       axes.set_title(args.title, fontsize=ssplot.PLOT_TITLE_FONTSIZE)
-    if args.units:
-      axes.set_xlabel('Latency ({0})'.format(args.units))
+    if args.latency_units:
+      axes.set_xlabel('Latency ({0})'.format(args.latency_units))
     else:
       axes.set_xlabel('Latency')
     axes.set_ylabel('Percentile')
