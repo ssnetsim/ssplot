@@ -230,47 +230,47 @@ class MultibarPlot(object):
   def apply_args(self, args, *skip):
     for s in skip:
       assert s in MultibarPlot._kwargs.keys()
-    if 'plot_style' not in skip and args.plot_style is not None:
+    if 'plot_style' not in skip and args.plot_style != None:
       self.set_plot_style(args.plot_style)
-    if 'figure_size' not in skip and args.figure_size is not None:
+    if 'figure_size' not in skip and args.figure_size != None:
       self.set_figure_size(args.figure_size)
-    if 'title' not in skip and args.title is not None:
+    if 'title' not in skip and args.title != None:
       self.set_title(args.title)
-    if 'xlabel' not in skip and args.xlabel is not None:
+    if 'xlabel' not in skip and args.xlabel != None:
       self.set_xlabel(args.xlabel)
-    if 'ylabel' not in skip and args.ylabel is not None:
+    if 'ylabel' not in skip and args.ylabel != None:
       self.set_ylabel(args.ylabel)
-    if 'data_labels' not in skip and args.data_labels is not None:
+    if 'data_labels' not in skip and args.data_labels != None:
       self.set_data_labels(args.data_labels)
-    if 'label_bars' not in skip and args.label_bars is not None:
+    if 'label_bars' not in skip and args.label_bars != None:
       self.set_label_bars(args.label_bars)
     if ('bar_label_precision' not in skip and
-        args.bar_label_precision is not None):
+        args.bar_label_precision != None):
       self.set_bar_label_precision(args.bar_label_precision)
-    if 'ymin' not in skip and args.ymin is not None:
+    if 'ymin' not in skip and args.ymin != None:
       self.set_ymin(args.ymin)
-    if 'ymax' not in skip and args.ymax is not None:
+    if 'ymax' not in skip and args.ymax != None:
       self.set_ymax(args.ymax)
-    if 'yauto_frame' not in skip and args.yauto_frame is not None:
+    if 'yauto_frame' not in skip and args.yauto_frame != None:
       self.set_yauto_frame(args.yauto_frame)
-    if 'ygrid' not in skip and args.ygrid is not None:
+    if 'ygrid' not in skip and args.ygrid != None:
       self.set_ygrid(args.ygrid)
-    if 'grid_style' not in skip and args.grid_style is not None:
+    if 'grid_style' not in skip and args.grid_style != None:
       self.set_grid_style(args.grid_style)
-    if 'ymajor_ticks' not in skip and args.ymajor_ticks is not None:
+    if 'ymajor_ticks' not in skip and args.ymajor_ticks != None:
       self.set_ymajor_ticks(args.ymajor_ticks)
-    if 'yminor_ticks' not in skip and args.yminor_ticks is not None:
+    if 'yminor_ticks' not in skip and args.yminor_ticks != None:
       self.set_yminor_ticks(args.yminor_ticks)
-    if 'legend_location' not in skip and args.legend_location is not None:
+    if 'legend_location' not in skip and args.legend_location != None:
       self.set_legend_location(args.legend_location)
-    if 'legend_columns' not in skip and args.legend_columns is not None:
+    if 'legend_columns' not in skip and args.legend_columns != None:
       self.set_legend_columns(args.legend_columns)
-    if 'legend_title' not in skip and args.legend_title is not None:
+    if 'legend_title' not in skip and args.legend_title != None:
       self.set_legend_title(args.legend_title)
-    if 'yscale' not in skip and args.yscale is not None:
+    if 'yscale' not in skip and args.yscale != None:
       self.set_yscale(args.yscale)
     if ('yticklabels_verbose' not in skip and
-        args.yticklabels_verbose is not None):
+        args.yticklabels_verbose != None):
       self.set_yticklabels_verbose(args.yticklabels_verbose)
 
   def plot(self, plotfile):
@@ -326,17 +326,17 @@ class MultibarPlot(object):
         hatch=style['hatch']))
 
     # set title
-    if self._title is not None:
+    if self._title != None:
       ax.set_title(self._title, fontsize=ssplot.PLOT_TITLE_FONTSIZE)
 
     # set axis labels
-    if self._xlabel is not None:
+    if self._xlabel != None:
       ax.set_xlabel(self._xlabel)
-    if self._ylabel is not None:
+    if self._ylabel != None:
       ax.set_ylabel(self._ylabel)
 
     # create legend
-    if self._data_labels is not None:
+    if self._data_labels != None:
       ax.legend((bar_set[0] for bar_set in bar_sets), self._data_labels,
                 loc=self._legend_location, ncol=self._legend_columns,
                 title=self._legend_title, fancybox=True, facecolor='white',
@@ -376,8 +376,8 @@ class MultibarPlot(object):
 
     # set axis scales
     ylog = False
-    if self._yscale is not None:
-      if self._yscale is 'log':
+    if self._yscale != None:
+      if self._yscale == 'log':
         ylog = True
         ax.set_yscale('log')
       elif self._yscale.startswith('log'):
@@ -393,13 +393,13 @@ class MultibarPlot(object):
       self._yminor_ticks = 20
 
     # set ticks
-    if self._ymajor_ticks is not None:
+    if self._ymajor_ticks != None:
       if ylog:
         raise ValueError('you can\'t set ymajor ticks with a logarithmic '
                          'y-axis')
       ax.yaxis.set_major_locator(
         matplotlib.ticker.MaxNLocator(self._ymajor_ticks))
-    if self._yminor_ticks is not None:
+    if self._yminor_ticks != None:
       if ylog:
         raise ValueError('you can\'t set yminor ticks with a logarithmic '
                          'y-axis')
