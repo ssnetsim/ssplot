@@ -65,8 +65,7 @@ class TimeLatency(ssplot.CommandLine):
   @staticmethod
   def run_command(args, plt):
     # create a sample stats object of latencies
-    stats = simplecsv.GridStats()
-    stats.read(args.ifile)
+    stats = simplecsv.GridStats.read(args.ifile)
 
     # determine the fields and data labels to plot
     fields = ssplot.LoadLatencyStats.FIELDS

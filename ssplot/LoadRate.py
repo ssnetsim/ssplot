@@ -72,8 +72,7 @@ class LoadRate(ssplot.CommandLine):
     # read in all stats
     stats = []
     for stat in args.stats:
-      gs = simplecsv.GridStats()
-      gs.read(stat)
+      gs = simplecsv.GridStats.read(stat)
       stats.append(gs)
 
     # create the LoadRate stats object
