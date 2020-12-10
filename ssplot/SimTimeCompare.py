@@ -90,8 +90,7 @@ class SimTimeCompare(ssplot.CommandLine):
               for x in range(args.data_set_size)]
     for idx, stat in enumerate(args.stats):
       # parse the data
-      cstats = simplecsv.ColumnStats()
-      cstats.read(stat)
+      cstats = simplecsv.ColumnStats.read(stat)
       simtime = cstats.get('Total sim units')
 
       # scale the data
