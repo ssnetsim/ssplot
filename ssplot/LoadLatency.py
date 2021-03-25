@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-import simplecsv
+import handycsv
 
 import ssplot
 
@@ -79,7 +79,7 @@ class LoadLatency(ssplot.CommandLine):
     # read in all stats
     stats = []
     for stat in args.stats:
-      gs = simplecsv.GridStats.read(stat)
+      gs = handycsv.GridStats.read(stat)
       stats.append(gs)
 
     # create LoadLatency stats object

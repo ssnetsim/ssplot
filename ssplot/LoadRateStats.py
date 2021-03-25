@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 """
 
-import simplecsv
+import handycsv
 import math
 import numpy
 
@@ -71,7 +71,7 @@ class LoadRateStats(object):
 
     # load data arrays
     for idx, grid in enumerate(grids):
-      assert isinstance(grid, simplecsv.GridStats), 'grids must be GridStats'
+      assert isinstance(grid, handycsv.GridStats), 'grids must be GridStats'
       # extract delivered
       delivered = []
       count = 0

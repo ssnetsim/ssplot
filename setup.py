@@ -61,6 +61,6 @@ setup(
   url='http://github.com/nicmcd/ssplot',
   packages=['ssplot'],
   scripts=['bin/ssplot'],
-  install_requires=['percentile >= 1.0.2',
-                    'simplecsv >= 3.0.0'],
+  install_requires=['percentile >= 1.0.3',
+                    'handycsv >= 4.0.0'],
 )
