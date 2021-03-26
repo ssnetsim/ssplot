@@ -62,5 +62,7 @@ setup(
   packages=['ssplot'],
   scripts=['bin/ssplot'],
   install_requires=['percentile >= 1.0.3',
-                    'handycsv >= 4.0.0'],
+                    'handycsv >= 4.0.0',
+                    'matplotlib >= 3.3.4',
+                    'numpy >= 1.20.1'],
 )
