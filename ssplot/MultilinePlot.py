@@ -532,6 +532,8 @@ class MultilinePlot(object):
     # generate the plot
     fig.tight_layout()
     fig.savefig(plotfile)
+    self._plt.close(fig)
+
 
 MultilinePlot._kwargs = {
   'plot_style': MultilinePlot.set_plot_style,

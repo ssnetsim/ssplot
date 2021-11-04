@@ -420,6 +420,8 @@ class MultibarPlot(object):
     # generate the plot
     fig.tight_layout()
     fig.savefig(plotfile)
+    self._plt.close(fig)
+
 
 MultibarPlot._kwargs = {
   'plot_style': MultibarPlot.set_plot_style,
