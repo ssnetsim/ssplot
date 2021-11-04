@@ -99,7 +99,7 @@ def inferno(plt, bar_count):
 PlotBarStyle.registerStyle('inferno', inferno, False)
 
 def inferno2(plt, bar_count):
-  assert bar_count <= 2
+  assert bar_count <= 2, '"inferno2" only supports 2 bars'
   cmap = plt.get_cmap('inferno')
   colors = [cmap(idx) for idx in numpy.linspace(0, 1.0, 6)]
   colors = [colors[1], colors[-2]]
