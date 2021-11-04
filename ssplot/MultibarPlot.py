@@ -346,9 +346,15 @@ class MultibarPlot(object):
     use_int = True
     for bar_set in bar_sets:
       for bar in bar_set:
-        if not bar.get_height().is_integer():
-          use_int = False
-          break
+        height = bar.get_height()
+        if isinstance(height, numpy.int64) or isinstance(height, int):
+          continue
+        elif isinstance(height, numpy.int64) or isinstance(height, float):
+          if not height.is_integer():
+            use_int = False
+            break
+        else:
+          assert False, f'New type detected: {type(height)}'
 
     # add value labels
     if self._label_bars:
