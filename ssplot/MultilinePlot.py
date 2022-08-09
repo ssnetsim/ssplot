@@ -471,7 +471,7 @@ class MultilinePlot(object):
         ax.set_xscale('log')
       elif self._xscale.startswith('log'):
         xlog = True
-        ax.set_xscale('log', basex=int(self._xscale[3:]))
+        ax.set_xscale('log', base=int(self._xscale[3:]))
       else:
         ax.set_xscale(self._xscale)
     ylog = False
@@ -481,7 +481,7 @@ class MultilinePlot(object):
         ax.set_yscale('log')
       elif self._yscale.startswith('log'):
         ylog = True
-        ax.set_yscale('log', basey=int(self._yscale[3:]))
+        ax.set_yscale('log', base=int(self._yscale[3:]))
       else:
         ax.set_yscale(self._yscale)
 

@@ -388,7 +388,7 @@ class MultibarPlot(object):
         ax.set_yscale('log')
       elif self._yscale.startswith('log'):
         ylog = True
-        ax.set_yscale('log', basey=int(self._yscale[3:]))
+        ax.set_yscale('log', base=int(self._yscale[3:]))
       else:
         ax.set_yscale(self._yscale)
 
